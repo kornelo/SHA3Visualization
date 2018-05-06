@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Windows;
+using System.Windows.Media.Media3D;
 using SHA3Visualization;
 
 namespace SHA3Visualization.SHA3
@@ -954,6 +957,10 @@ namespace SHA3Visualization.SHA3
         internal void SetBitstring(Bitstring bitstring)
         {
             _bitstring = bitstring;
+            //if (((MainWindow)Application.Current.MainWindow).cube == null)
+            //{
+                ((MainWindow) Application.Current.MainWindow).cube = new Cube(_size.W, bitstring.Bytes);
+            //}
         }
 
         #endregion

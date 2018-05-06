@@ -38,6 +38,9 @@ namespace SHA3Visualization
         // The camera.
         private PerspectiveCamera TheCamera;
 
+        // public cube
+        public Cube cube;
+
         // The camera's current location.
         private double CameraPhi = Math.PI / 6.0; // 30 degrees
 
@@ -80,10 +83,12 @@ namespace SHA3Visualization
             DefineLights(MainModel3Dgroup);
 
             // Create the model.
-            
-            var cube = new Cube(MainModel3Dgroup);
-           // MainModel3Dgroup = cube.ReturnMainModel();
+            PerformHashing();
+
+            // MainModel3Dgroup = cube.ReturnMainModel();
             SelectableModels = cube.ReturnListOfModels();
+
+            
 
             // Add the group of models to a ModelVisual3D.
             ModelVisual3D model_visual = new ModelVisual3D
@@ -94,7 +99,7 @@ namespace SHA3Visualization
             // Display the main visual to the viewportt.
             MainTabView.Children.Add(model_visual);
 
-            PerformHashing();
+           
 
         }
 
@@ -281,7 +286,7 @@ namespace SHA3Visualization
 
         public void PerformHashing()
         {
-            var alghorithm = new SHA3.SHA3(512);
+            var alghorithm = new SHA3.SHA3(224);
             byte[] data = { };
             alghorithm.ComputeHash(data);
         }

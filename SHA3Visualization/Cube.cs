@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 
 namespace SHA3Visualization
 {
-    class Cube
+    public class Cube
     {
 
         #region Initializations
@@ -29,12 +32,15 @@ namespace SHA3Visualization
         private List<GeometryModel3D> SelectableModels =
             new List<GeometryModel3D>();
 
+        //delegate
+        private delegate Brush ActionBrush(string value);
+
+
         #endregion
 
-        public Cube(Model3DGroup model_group)
+        public Cube(int size, byte[] values )
         {
-            MainModel3Dgroup = model_group;
-            DefineModel(20,20,20);
+            DefineModel(5,5,size, values);
         }
 
         public Model3DGroup ReturnMainModel()
@@ -47,51 +53,83 @@ namespace SHA3Visualization
             return SelectableModels;
         }
 
-        private void DefineModel(int width, int heigth, int depth)
+        private void DefineModel(int width, int heigth, int depth, byte[] values)
         {
+            // clear out the existing geometry XAML
+            MainModel3Dgroup.Children.Clear();
+            SelectableModels.Clear();
+
             // Make the normal and selected materials.
             NormalMaterial = new DiffuseMaterial(Brushes.LightGreen);
             SelectedMaterial = new DiffuseMaterial(Brushes.Red);
 
-            // Create some cubes.
-            for (int x = -(width/2); x <= (width/2); x += 2)
+            List<string> listString = new List<string>();
+
+            for(var i=0; i<values.Length; i++)
             {
-                for (int y = -(heigth/2); y <= (heigth/2); y += 2)
+                var builder = new StringBuilder(values.Length);
+                builder.Append(values[i].ToString("X2"));
+                listString.Add(builder.ToString());
+                builder.Clear();
+            }
+
+
+            Action<float,float,float,float,float,float, string> actionFillCube = FillCube;
+
+            // Lights
+            MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
+            {
+                MainModel3Dgroup.Children.Add(new AmbientLight(Colors.Gray));
+                MainModel3Dgroup.Children.Add(new DirectionalLight(Colors.Gray, new Vector3D(1, -2, -3)));
+                MainModel3Dgroup.Children.Add(new DirectionalLight(Colors.Gray, new Vector3D(-1, 2, 3)));
+
+            }));
+
+            //list iterator
+            var listIterator = 0;
+            
+            // Create some cubes.
+            for (int x = -(width); x < (width); x += 2)
+            {
+                for (int y = -(heigth); y < (heigth) ; y += 2)
                 {
-                    for (int z = -(depth/2); z <= (depth/2); z += 2)
+                    for (int z = -(depth); z < (depth); z += 2)
                     {
                         // Make a cube with lower left corner (x, y, z).
-                        var mesh = new MeshGeometry3D();
-                        FillCube(mesh, x, y, z, 1, 1, 1, "0");
-
+                        Task.Run(() => actionFillCube(x, y, z, 1, 1, 1, listString[listIterator]));
+                        listIterator = (listIterator < listString.Count-1) ? ++listIterator : 0;
                     }
                 }
             }
 
             // X axis.
             MeshGeometry3D mesh_x = MeshExtensions.XAxisArrow(6);
-            MainModel3Dgroup.Children.Add(mesh_x.SetMaterial(Brushes.Red, false));
-
+            MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
+            {
+                MainModel3Dgroup.Children.Add(mesh_x.SetMaterial(Brushes.Red, false));
+            }));
+            
             // Y axis.
             MeshGeometry3D mesh_y = MeshExtensions.YAxisArrow(6);
-            MainModel3Dgroup.Children.Add(mesh_y.SetMaterial(Brushes.Green, false));
+            MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
+            {
+                MainModel3Dgroup.Children.Add(mesh_y.SetMaterial(Brushes.Green, false));
+            }));
 
             // Z axis.
             MeshGeometry3D mesh_z = MeshExtensions.ZAxisArrow(6);
-            MainModel3Dgroup.Children.Add(mesh_z.SetMaterial(Brushes.Blue, false));
+            MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
+            {
+                MainModel3Dgroup.Children.Add(mesh_z.SetMaterial(Brushes.Blue, false));
+            }));
         }
 
-        public void FillCube(MeshGeometry3D mesh, float x, float y, float z, float dx, float dy, float dz, string value)
+        public void FillCube( float x, float y, float z, float dx, float dy, float dz, string value)
         {
-            // clear out the existing geometry XAML
-            //MainModel3Dgroup.Children.Clear(); 
-
-            // Lights
-
-            MainModel3Dgroup.Children.Add(new AmbientLight(Colors.Gray));
-            MainModel3Dgroup.Children.Add(new DirectionalLight(Colors.Gray, new Vector3D(1, -2, -3)));
-            MainModel3Dgroup.Children.Add(new DirectionalLight(Colors.Gray, new Vector3D(-1, 2, 3)));
-
+            
+            //declaration of main mesh
+            var mesh = new MeshGeometry3D();
+            
             // Front
             {
                 mesh = new MeshGeometry3D();
@@ -100,8 +138,9 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z + dz));
                 mesh.Positions.Add(new Point3D(x, y + dy, z + dz));
                 AddingMeshProperties(ref mesh);
-                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
-                MainModel3Dgroup.Children.Add(geommodel3d);
+                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)),value)));
+
+               MainModel3Dgroup.Dispatcher.Invoke(new Action(() => { MainModel3Dgroup.Children.Add(geommodel3d); }));
 
                 // Remember that this model is selectable.
                 SelectableModels.Add(geommodel3d);
@@ -115,8 +154,10 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x, y + dy, z));
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z));
                 AddingMeshProperties(ref mesh);
-                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
-                MainModel3Dgroup.Children.Add(geommodel3d);
+                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)), value)));
+                //GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
+                //MainModel3Dgroup.Dispatcher.Invoke(new Action(() => { MainModel3Dgroup.Children.Add(geommodel3d); }));
+                // MainModel3Dgroup.Children.Add(geommodel3d);
 
                 // Remember that this model is selectable.
                 SelectableModels.Add(geommodel3d);
@@ -208,10 +249,14 @@ namespace SHA3Visualization
             viewBox.Measure(size);
             viewBox.Arrange(new Rect(size));
             RenderTargetBitmap bitmap = new RenderTargetBitmap(35, 40, 80, 80, PixelFormats.Pbgra32);
-           
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             bitmap.Render(viewBox);
 
             return new ImageBrush(bitmap);
         }
+
     }
 }
