@@ -196,6 +196,7 @@ namespace SHA3Visualization.SHA3
             _size = state._size;
             _rate = state._rate;
             _bitstring = new Bitstring(state._bitstring);
+
         }
 
         /// <summary>
@@ -957,10 +958,6 @@ namespace SHA3Visualization.SHA3
         internal void SetBitstring(Bitstring bitstring)
         {
             _bitstring = bitstring;
-            //if (((MainWindow)Application.Current.MainWindow).cube == null)
-            //{
-                ((MainWindow) Application.Current.MainWindow).cube = new Cube(_size.W, bitstring.Bytes);
-            //}
         }
 
         #endregion

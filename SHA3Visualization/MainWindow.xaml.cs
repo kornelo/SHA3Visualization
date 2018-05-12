@@ -39,7 +39,7 @@ namespace SHA3Visualization
         private PerspectiveCamera TheCamera;
 
         // public cube
-        public Cube cube;
+        public Cube cube;// = new Cube();
 
         // The camera's current location.
         private double CameraPhi = Math.PI / 6.0; // 30 degrees
