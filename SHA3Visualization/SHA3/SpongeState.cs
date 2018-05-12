@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Windows;
+using System.Windows.Media.Media3D;
 using SHA3Visualization;
 
 namespace SHA3Visualization.SHA3
@@ -193,6 +196,7 @@ namespace SHA3Visualization.SHA3
             _size = state._size;
             _rate = state._rate;
             _bitstring = new Bitstring(state._bitstring);
+
         }
 
         /// <summary>
