@@ -141,7 +141,7 @@ namespace SHA3Visualization.SHA3
                 Absorb(bytes, inputLength);
                 if (((MainWindow)Application.Current.MainWindow).cube == null)
                 {
-                    ((MainWindow)Application.Current.MainWindow).cube = new Cube(State.Size.W, State.Bitstring.Bytes);
+                   // ((MainWindow)Application.Current.MainWindow).cube = new Cube(State.Size.W, State.Bitstring.Bytes);
                 }
                 result = Squeeze(outputLength);
             }

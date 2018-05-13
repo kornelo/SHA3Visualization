@@ -14,12 +14,20 @@
         <TabControl HorizontalAlignment="Left" Height="745" VerticalAlignment="Top" Width="1172" Margin="10,10,0,0" Grid.ColumnSpan="2">
             <TabItem Header="TabItem">
                 <Grid x:Name="Tab" Background="#FFE5E5E5">
-                    <Border>
-                        <Viewport3D x:Name="MainTabView"  />
+                    <Border Margin="0,27,0,0">
+                        <Viewport3D x:Name="MainTabView" Margin="0,25,0,0">
+                            
+                        </Viewport3D>  
                     </Border>
                     <ScrollBar x:Name="HorizontalScrollBar" HorizontalAlignment="Center" Height="30" Margin="10,685,0,0" VerticalAlignment="Center" Width="1050" Orientation="Horizontal" Minimum="-180" Maximum="181" ValueChanged="HorizontalScrollBar_ValueChanged"/>
                     <ScrollBar x:Name="VerticalScrollBar" HorizontalAlignment="Left" Height="660" Margin="1130,10,0,0" VerticalAlignment="Center" Width="30" Minimum="-180" Maximum="180" ValueChanged="VerticalScrollBar_ValueChanged"/>
-                    <ScrollBar x:Name="ZoomScrollBar" HorizontalAlignment="Left" Height="34" Margin="29,10,0,0" VerticalAlignment="Top" Width="505" Maximum="15" Minimum="-15" ValueChanged="ZoomScrollBar_ValueChanged" Orientation="Horizontal"/>
+                    <ScrollBar x:Name="ZoomScrollBar" HorizontalAlignment="Left" Height="34" Margin="29,10,0,0" VerticalAlignment="Top" Width="124" Maximum="15" Minimum="-15" ValueChanged="ZoomScrollBar_ValueChanged" Orientation="Horizontal"/>
+                    <ComboBox x:Name="presentationMenuComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="423" Margin="672,5,0,0" SelectionChanged="ComboBox_SelectionChanged">
+                           <ComboBoxItem Content="Cube state"></ComboBoxItem>
+                    </ComboBox>
+                    <TextBox x:Name="xValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="251,5,0,0"/>
+                    <TextBox x:Name="yValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="308,4,0,0"/>
+                    <TextBox x:Name="zValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="365,5,0,0"/>
 
                 </Grid>
             </TabItem>

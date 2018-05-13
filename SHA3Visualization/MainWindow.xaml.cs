@@ -39,13 +39,12 @@ namespace SHA3Visualization
         private PerspectiveCamera TheCamera;
 
         // public cube
-        public Cube cube;// = new Cube();
+        public Cube cube = new Cube();
 
         // The camera's current location.
-        private double CameraPhi = Math.PI / 6.0; // 30 degrees
-
-        private double CameraTheta = Math.PI / 6.0; // 30 degrees
-        private double CameraR = 15.0;
+        private double CameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
+        private double CameraTheta =  8.0 * Math.PI / 18.0; // 30 degrees
+        private double CameraR = 30.0;
 
         // The change in CameraPhi when you press the up and down arrows.
         private const double CameraDPhi = 0.1;
@@ -83,7 +82,8 @@ namespace SHA3Visualization
             DefineLights(MainModel3Dgroup);
 
             // Create the model.
-            PerformHashing();
+            //PerformHashing();
+           // StateCubePresetation();
 
             // MainModel3Dgroup = cube.ReturnMainModel();
             SelectableModels = cube.ReturnListOfModels();
@@ -98,9 +98,7 @@ namespace SHA3Visualization
 
             // Display the main visual to the viewportt.
             MainTabView.Children.Add(model_visual);
-
-           
-
+            
         }
 
         #endregion
@@ -171,13 +169,23 @@ namespace SHA3Visualization
             double hyp = CameraR * Math.Cos(CameraPhi);
             double x = hyp * Math.Cos(CameraTheta);
             double z = hyp * Math.Sin(CameraTheta);
-            TheCamera.Position = new Point3D(x, y, z);
+
+            // Moving camera
+            double xMove = 6;
+            double yMove = 7;
+            double zMove = 0;
+
+            TheCamera.Position = new Point3D(x +xMove , y + yMove, z + zMove);
 
             // Look toward the origin.
-            TheCamera.LookDirection = new Vector3D(-x, -y, -z);
+            TheCamera.LookDirection = new Vector3D(-x , -y, -z);
 
             // Set the Up direction.
-            TheCamera.UpDirection = new Vector3D(0, 1, 0);
+
+            xValue.Text = TheCamera.Position.X.ToString();
+            yValue.Text = TheCamera.Position.Y.ToString();
+            zValue.Text = TheCamera.Position.Z.ToString();
+
         }
 
         #region Hit Testing Code
@@ -192,11 +200,11 @@ namespace SHA3Visualization
             {
                 case Key.Up:
                     CameraPhi += CameraDPhi;
-                    if (CameraPhi > Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+                    if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
                     break;
                 case Key.Down:
                     CameraPhi -= CameraDPhi;
-                    if (CameraPhi < -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
+                    if (CameraPhi <  -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
                     break;
                 case Key.Left:
                     CameraTheta += CameraDTheta;
@@ -291,6 +299,17 @@ namespace SHA3Visualization
             alghorithm.ComputeHash(data);
         }
 
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (presentationMenuComboBox.SelectedIndex)
+            {
+
+                default:
+                    StateCubePresetation();
+                    break;
+            }
+        }
+
         private Brush SelectedBrush(string value, bool selected = false)
         {
             TextBlock textBlock; 
@@ -306,6 +325,22 @@ namespace SHA3Visualization
             bitmap.Render(viewBox);
 
             return new ImageBrush(bitmap);
+        }
+
+        private void StateCubePresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(8,new byte[]{});
+
+            // Add the group of models to a ModelVisual3D.
+            ModelVisual3D model_visual = new ModelVisual3D
+            {
+                Content = cube.ReturnMainModel()
+            };
+
+            // Display the main visual to the viewportt.
+            MainModel3Dgroup.Children.Clear();
+            MainTabView.Children.Add(model_visual);
         }
     }
 }

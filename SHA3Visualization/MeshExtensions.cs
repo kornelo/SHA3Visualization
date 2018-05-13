@@ -422,21 +422,21 @@ namespace SHA3Visualization
         public static MeshGeometry3D XAxisArrow(float length)
         {
             MeshGeometry3D mesh = new MeshGeometry3D();
-            mesh.AddArrow(new Point3D(0, 0, 0), new Point3D(6, 0, 0),
+            mesh.AddArrow(new Point3D(12, 0, 0), new Point3D(6, 0, 0),
                 new Vector3D(0, 1, 0), 0.5);
             return mesh;
         }
         public static MeshGeometry3D YAxisArrow(float length)
         {
             MeshGeometry3D mesh = new MeshGeometry3D();
-            mesh.AddArrow(new Point3D(0, 0, 0), new Point3D(0, 6, 0),
+            mesh.AddArrow(new Point3D(12, 0, 0), new Point3D(12, 6, 0),
                 new Vector3D(1, 0, 0), 0.5);
             return mesh;
         }
         public static MeshGeometry3D ZAxisArrow(float length)
         {
             MeshGeometry3D mesh = new MeshGeometry3D();
-            mesh.AddArrow(new Point3D(0, 0, 0), new Point3D(0, 0, 6),
+            mesh.AddArrow(new Point3D(12, 0, 0), new Point3D(12, 0, 6),
                 new Vector3D(0, 1, 0), 0.5);
             return mesh;
         }

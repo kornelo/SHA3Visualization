@@ -75,7 +75,8 @@ namespace SHA3Visualization
                 listString.Add(builder.ToString());
                 builder.Clear();
             }
-
+            //if empty list
+            if (listString.Count == 0) listString.Add("00");
 
             Action<float,float,float,float,float,float, string> actionFillCube = FillCube;
 
@@ -90,13 +91,20 @@ namespace SHA3Visualization
 
             //list iterator
             var listIterator = 0;
-            
+
             // Create some cubes.
-            for (int x = -(width); x < (width); x += 2)
+            //for (int x = -(width); x < (width); x += 2)
+            //{
+            //    for (int y = -(heigth); y < (heigth); y += 2)
+            //    {
+            //        for (int z = -(depth); z < (depth); z += 2)
+
+
+            for (int x =2; x < 2*(width)+2; x += 2)
             {
-                for (int y = -(heigth); y < (heigth) ; y += 2)
+                for (int y =2; y < 2*(heigth)+2 ; y += 2)
                 {
-                    for (int z = -(depth); z < (depth); z += 2)
+                    for (int z = 2; z < 2*(depth)+2; z += 2)
                     {
                         // Make a cube with lower left corner (x, y, z).
                         //Task.Run(() =>
@@ -109,24 +117,20 @@ namespace SHA3Visualization
 
             // X axis.
             MeshGeometry3D mesh_x = MeshExtensions.XAxisArrow(6);
-           // MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-          //  {
+
                 MainModel3Dgroup.Children.Add(mesh_x.SetMaterial(Brushes.Red, false));
-           // }));
             
             // Y axis.
             MeshGeometry3D mesh_y = MeshExtensions.YAxisArrow(6);
-          //  MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-          //  {
+
                 MainModel3Dgroup.Children.Add(mesh_y.SetMaterial(Brushes.Green, false));
-           // }));
+
 
             // Z axis.
             MeshGeometry3D mesh_z = MeshExtensions.ZAxisArrow(6);
-          //  MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-           // {
+
                 MainModel3Dgroup.Children.Add(mesh_z.SetMaterial(Brushes.Blue, false));
-            //}));
+
         }
 
         public void FillCube( float x, float y, float z, float dx, float dy, float dz, string value)
