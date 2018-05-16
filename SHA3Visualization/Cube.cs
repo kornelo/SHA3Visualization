@@ -29,8 +29,7 @@ namespace SHA3Visualization
         private Material NormalMaterial, SelectedMaterial;
 
         // The list of selectable models.
-        private List<GeometryModel3D> SelectableModels =
-            new List<GeometryModel3D>();
+        private Dictionary<GeometryModel3D,string> SelectableModels = new Dictionary<GeometryModel3D, string>();
 
         //delegate
         private delegate Brush ActionBrush(string value);
@@ -46,12 +45,17 @@ namespace SHA3Visualization
             DefineModel(5,5,size, values);
         }
 
+        public Cube(int x, int y, int z, byte[] values)
+        {
+            DefineModel(x, y, z, values);
+        }
+
         public Model3DGroup ReturnMainModel()
         {
             return MainModel3Dgroup;
         }
 
-        public List<GeometryModel3D> ReturnListOfModels()
+        public Dictionary<GeometryModel3D, string> ReturnListOfModels()
         {
             return SelectableModels;
         }
@@ -92,14 +96,8 @@ namespace SHA3Visualization
             //list iterator
             var listIterator = 0;
 
-            // Create some cubes.
-            //for (int x = -(width); x < (width); x += 2)
-            //{
-            //    for (int y = -(heigth); y < (heigth); y += 2)
-            //    {
-            //        for (int z = -(depth); z < (depth); z += 2)
-
-
+            // Create cubes.
+            
             for (int x =2; x < 2*(width)+2; x += 2)
             {
                 for (int y =2; y < 2*(heigth)+2 ; y += 2)
@@ -155,7 +153,7 @@ namespace SHA3Visualization
                //}));
 
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d);
+                SelectableModels.Add(geommodel3d, value);
             }
 
             // Back
@@ -167,13 +165,13 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z));
                 AddingMeshProperties(ref mesh);
                 GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)), value)));
+                
                 //GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
                 //MainModel3Dgroup.Dispatcher.Invoke(new Action(() => { 
                 MainModel3Dgroup.Children.Add(geommodel3d); //}));
-                // MainModel3Dgroup.Children.Add(geommodel3d);
-
+                
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d);
+                SelectableModels.Add(geommodel3d, value);
 
             }
 

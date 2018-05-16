@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SHA3Visualization"
         mc:Ignorable="d"
-        Title="SHA-3 Visualizer" Height="796" Width="1200" Loaded="SHA3Visualizer_Loaded" KeyDown="SHA3Visualizer_KeyDown" MouseDown="SHA3Visualizer_MouseDown">
+        Title="SHA-3 Visualizer" Height="796" Width="1200" Loaded="SHA3Visualizer_Loaded"  MouseDown="SHA3Visualizer_MouseDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="531*"/>
@@ -15,7 +15,7 @@
             <TabItem Header="TabItem">
                 <Grid x:Name="Tab" Background="#FFE5E5E5">
                     <Border Margin="0,27,0,0">
-                        <Viewport3D x:Name="MainTabView" Margin="0,25,0,0">
+                        <Viewport3D x:Name="MainTabView" Margin="0,25,0,0" KeyDown="SHA3Visualizer_KeyDown">
                             
                         </Viewport3D>  
                     </Border>
@@ -29,39 +29,6 @@
                     <TextBox x:Name="yValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="308,4,0,0"/>
                     <TextBox x:Name="zValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="365,5,0,0"/>
 
-                </Grid>
-            </TabItem>
-            <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5">
-                    <Viewport3D x:Name="viewport3D1" Height="716" Width="1166">
-                        <Viewport3D.Camera>
-                            <PerspectiveCamera Position="0,0,2" LookDirection="0,0,-10" FieldOfView="90"/>
-                        </Viewport3D.Camera>
-                        <Viewport3D.Children>
-                            <ModelVisual3D>
-                                <ModelVisual3D.Content>
-                                    <Model3DGroup>
-                                        <AmbientLight Color="White"/>
-                                    </Model3DGroup>
-                                </ModelVisual3D.Content>
-                            </ModelVisual3D>
-                            <ModelVisual3D>
-                                <ModelVisual3D.Content>
-                                    <GeometryModel3D>
-                                        <GeometryModel3D.Geometry>
-                                            <MeshGeometry3D
-                                                TriangleIndices="0,1,2 2,3,0"
-                                                TextureCoordinates="0,1 1,1 1,0 0,0"
-                                                Positions="-0.5,-0.5,0 0.5,-0.5,0 0.5,0.5,0 -0.5,0.5,0" />
-                                        </GeometryModel3D.Geometry>
-                                        <GeometryModel3D.Material>
-                                            <DiffuseMaterial x:Name="material"/>
-                                        </GeometryModel3D.Material>
-                                    </GeometryModel3D>
-                                </ModelVisual3D.Content>
-                            </ModelVisual3D>
-                        </Viewport3D.Children>
-                    </Viewport3D>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -39,7 +39,7 @@ namespace SHA3Visualization
         private PerspectiveCamera TheCamera;
 
         // public cube
-        public Cube cube = new Cube();
+        public Cube cube;
 
         // The camera's current location.
         private double CameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
@@ -56,19 +56,16 @@ namespace SHA3Visualization
         private const double CameraDR = 0.1;
 
         // The currently selected model.
-        private GeometryModel3D SelectedModel = null;
+        private GeometryModel3D SelectedModel;
 
         // Materials used for normal and selected models.
         private Material NormalMaterial, SelectedMaterial;
 
         // The list of selectable models.
-        private List<GeometryModel3D> SelectableModels =
-            new List<GeometryModel3D>();
+        private Dictionary<GeometryModel3D, string> SelectableModels;
 
         private void SHA3Visualizer_Loaded(object sender, RoutedEventArgs e)
         {
-
-            //MouseHandler();
 
             // Give the camera its initial position.
             TheCamera = new PerspectiveCamera
@@ -83,22 +80,26 @@ namespace SHA3Visualization
 
             // Create the model.
             //PerformHashing();
-           // StateCubePresetation();
+            // StateCubePresetation();
 
-            // MainModel3Dgroup = cube.ReturnMainModel();
-            SelectableModels = cube.ReturnListOfModels();
 
-            
+            //Loading View
+            RefreshModelView();
+        }
+
+        public void RefreshModelView()
+        {
+            //Collection of Models
+            SelectableModels = (cube != null) ? cube.ReturnListOfModels() : null;
 
             // Add the group of models to a ModelVisual3D.
             ModelVisual3D model_visual = new ModelVisual3D
             {
-                Content = cube.ReturnMainModel()
+                Content = (cube != null) ? cube.ReturnMainModel() : null
             };
 
             // Display the main visual to the viewportt.
             MainTabView.Children.Add(model_visual);
-            
         }
 
         #endregion
@@ -115,44 +116,6 @@ namespace SHA3Visualization
                 new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), HorizontalScrollBar.Value));
         }
 
-        #region MouseFeature
-
-        private void MouseHandler()
-        {
-            MainTabView.MouseDown += (ss, ee) =>
-            {
-                MainTabView.CaptureMouse();
-            };
-
-            MainTabView.MouseUp += (ss, ee) =>
-            {
-                MainTabView.ReleaseMouseCapture();
-            };
-
-            MainTabView.MouseMove += (ss, ee) =>
-            {
-                if (ee.LeftButton == MouseButtonState.Pressed)
-                {
-                    //    Cube.Transform =
-                    //        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), ee.GetPosition(this).Y));  
-                    TheCamera.Transform =
-                        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 1, 1), ee.GetPosition(this).Y));
-                }
-                else if (ee.RightButton == MouseButtonState.Pressed)
-                {
-                    TheCamera.Transform =
-                        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), ee.GetPosition(this).X));
-                }
-                else if (ee.MiddleButton == MouseButtonState.Pressed)
-                {
-                    TheCamera.Transform =
-                        new ScaleTransform3D(ee.GetPosition(this).Y / 500, ee.GetPosition(this).Y / 500,
-                            ee.GetPosition(this).Y / 500);
-                }
-            };
-
-        }
-        #endregion
 
         private void ZoomScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -229,22 +192,25 @@ namespace SHA3Visualization
 
         private void SHA3Visualizer_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // Make the normal and selected materials.
-            NormalMaterial = new DiffuseMaterial(SelectedBrush("0"));
-            SelectedMaterial = new DiffuseMaterial(SelectedBrush("0",true));
+            
 
             // Deselect the prevously selected model.
             if (SelectedModel != null)
             {
+                var value = SelectableModels[SelectedModel];
+
+                // Make the normal and selected materials.
+                NormalMaterial = new DiffuseMaterial(SelectedBrush(value));
+                
                 SelectedModel
                     .Material = NormalMaterial;
 
                 //back site of number
-                var index = SelectableModels.IndexOf(SelectedModel);
+                var index = SelectableModels[SelectedModel].IndexOf(value);
                 if (SelectedModel.Bounds.Z % 2 == 0)
-                    SelectedModel = SelectableModels.ElementAt(index + 1);
+                    SelectedModel = SelectableModels.ElementAt(index + 1).Key;
                 else
-                    SelectedModel = SelectableModels.ElementAt(index - 1);
+                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
 
                 SelectedModel.Material = NormalMaterial;
                 SelectedModel = null;
@@ -263,17 +229,22 @@ namespace SHA3Visualization
             if (mesh_result != null)
             {
                 GeometryModel3D model = (GeometryModel3D)mesh_result.ModelHit;
-                if (SelectableModels.Contains(model))
+                if (SelectableModels.ContainsKey(model))
                 {
                     SelectedModel = model;
                     SelectedModel.Material = SelectedMaterial;
-                    
+
+                    var value = SelectableModels[SelectedModel];
+
+                    // Make the selected materials.
+                    SelectedMaterial = new DiffuseMaterial(SelectedBrush(value, true));
+
                     //back site of number selection
-                    var index = SelectableModels.IndexOf(SelectedModel);
-                    if (SelectedModel.Bounds.Z%2 == 0)
-                        SelectedModel = SelectableModels.ElementAt(index + 1);
+                    var index = SelectableModels[SelectedModel].IndexOf(value);
+                    if (SelectedModel.Bounds.Z % 2 == 0)
+                        SelectedModel = SelectableModels.ElementAt(index + 1).Key;
                     else
-                        SelectedModel = SelectableModels.ElementAt(index - 1);
+                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
 
                     SelectedModel.Material = SelectedMaterial;
                 }
@@ -301,11 +272,17 @@ namespace SHA3Visualization
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            switch (presentationMenuComboBox.SelectedIndex)
+
+
+            switch (presentationMenuComboBox.SelectedValue)
             {
 
                 default:
-                    StateCubePresetation();
+                    //StateCubePresetation();
+                    //SlicePresetation();
+                    //LanePresetation();
+                    //RowPresetation();
+                    ColumnPresentation();
                     break;
             }
         }
@@ -331,16 +308,46 @@ namespace SHA3Visualization
         {
             //Preparing Cube
             cube = new Cube(8,new byte[]{});
+            
+            RefreshModelView();
+        }
 
-            // Add the group of models to a ModelVisual3D.
-            ModelVisual3D model_visual = new ModelVisual3D
-            {
-                Content = cube.ReturnMainModel()
-            };
+        private void SlicePresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(1, new byte[] { });
 
-            // Display the main visual to the viewportt.
-            MainModel3Dgroup.Children.Clear();
-            MainTabView.Children.Add(model_visual);
+            RefreshModelView();
+            
+        }
+
+        private void LanePresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(1,1,8, new byte[] { });
+
+            RefreshModelView();
+
+        }
+
+        private void RowPresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(5, 1, 1, new byte[] { });
+
+            RefreshModelView();
+
+        }
+
+        private void ColumnPresentation()
+        {
+            var sth = "abc";
+
+            //Preparing Cube
+            cube = new Cube(1, 5, 1, Encoding.ASCII.GetBytes(sth));
+
+            RefreshModelView();
+
         }
     }
 }
