@@ -39,13 +39,12 @@ namespace SHA3Visualization
         private PerspectiveCamera TheCamera;
 
         // public cube
-        public Cube cube;// = new Cube();
+        public Cube cube;
 
         // The camera's current location.
-        private double CameraPhi = Math.PI / 6.0; // 30 degrees
-
-        private double CameraTheta = Math.PI / 6.0; // 30 degrees
-        private double CameraR = 15.0;
+        private double CameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
+        private double CameraTheta =  8.0 * Math.PI / 18.0; // 30 degrees
+        private double CameraR = 30.0;
 
         // The change in CameraPhi when you press the up and down arrows.
         private const double CameraDPhi = 0.1;
@@ -57,19 +56,16 @@ namespace SHA3Visualization
         private const double CameraDR = 0.1;
 
         // The currently selected model.
-        private GeometryModel3D SelectedModel = null;
+        private GeometryModel3D SelectedModel;
 
         // Materials used for normal and selected models.
         private Material NormalMaterial, SelectedMaterial;
 
         // The list of selectable models.
-        private List<GeometryModel3D> SelectableModels =
-            new List<GeometryModel3D>();
+        private Dictionary<GeometryModel3D, string> SelectableModels;
 
         private void SHA3Visualizer_Loaded(object sender, RoutedEventArgs e)
         {
-
-            //MouseHandler();
 
             // Give the camera its initial position.
             TheCamera = new PerspectiveCamera
@@ -82,85 +78,38 @@ namespace SHA3Visualization
             // Define lights.
             DefineLights(MainModel3Dgroup);
 
+            //Fill up for menu ComboBox
+            ComboBoxDynamicFill();
+
             // Create the model.
-            PerformHashing();
+            //PerformHashing();
+            // StateCubePresetation();
 
-            // MainModel3Dgroup = cube.ReturnMainModel();
-            SelectableModels = cube.ReturnListOfModels();
 
-            
+            //Loading View
+            RefreshModelView();
+        }
+
+        public void RefreshModelView()
+        {
+            // clear out the existing geometry XAML
+            MainModel3Dgroup.Children.Clear();
+            MainTabView.Children.Clear();
+
+            //Collection of Models
+            SelectableModels = (cube != null) ? cube.ReturnListOfModels() : null;
 
             // Add the group of models to a ModelVisual3D.
             ModelVisual3D model_visual = new ModelVisual3D
             {
-                Content = cube.ReturnMainModel()
+                Content = (cube != null) ? cube.ReturnMainModel() : null
             };
 
             // Display the main visual to the viewportt.
             MainTabView.Children.Add(model_visual);
-
-           
-
         }
 
         #endregion
-
-        private void VerticalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            TheCamera.Transform =
-                new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), VerticalScrollBar.Value));
-        }
-
-        private void HorizontalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            TheCamera.Transform =
-                new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), HorizontalScrollBar.Value));
-        }
-
-        #region MouseFeature
-
-        private void MouseHandler()
-        {
-            MainTabView.MouseDown += (ss, ee) =>
-            {
-                MainTabView.CaptureMouse();
-            };
-
-            MainTabView.MouseUp += (ss, ee) =>
-            {
-                MainTabView.ReleaseMouseCapture();
-            };
-
-            MainTabView.MouseMove += (ss, ee) =>
-            {
-                if (ee.LeftButton == MouseButtonState.Pressed)
-                {
-                    //    Cube.Transform =
-                    //        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), ee.GetPosition(this).Y));  
-                    TheCamera.Transform =
-                        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 1, 1), ee.GetPosition(this).Y));
-                }
-                else if (ee.RightButton == MouseButtonState.Pressed)
-                {
-                    TheCamera.Transform =
-                        new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 0, 1), ee.GetPosition(this).X));
-                }
-                else if (ee.MiddleButton == MouseButtonState.Pressed)
-                {
-                    TheCamera.Transform =
-                        new ScaleTransform3D(ee.GetPosition(this).Y / 500, ee.GetPosition(this).Y / 500,
-                            ee.GetPosition(this).Y / 500);
-                }
-            };
-
-        }
-        #endregion
-
-        private void ZoomScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-        //    Cube.Transform =
-        //        new ScaleTransform3D(ZoomScrollBar.Value, ZoomScrollBar.Value, ZoomScrollBar.Value);
-        }
 
 
         // Position the camera.
@@ -171,13 +120,23 @@ namespace SHA3Visualization
             double hyp = CameraR * Math.Cos(CameraPhi);
             double x = hyp * Math.Cos(CameraTheta);
             double z = hyp * Math.Sin(CameraTheta);
-            TheCamera.Position = new Point3D(x, y, z);
+
+            // Moving camera
+            double xMove = 6;
+            double yMove = 7;
+            double zMove = 0;
+
+            TheCamera.Position = new Point3D(x +xMove , y + yMove, z + zMove);
 
             // Look toward the origin.
-            TheCamera.LookDirection = new Vector3D(-x, -y, -z);
+            TheCamera.LookDirection = new Vector3D(-x , -y, -z);
 
             // Set the Up direction.
-            TheCamera.UpDirection = new Vector3D(0, 1, 0);
+
+            xValue.Text = TheCamera.Position.X.ToString();
+            yValue.Text = TheCamera.Position.Y.ToString();
+            zValue.Text = TheCamera.Position.Z.ToString();
+
         }
 
         #region Hit Testing Code
@@ -192,11 +151,11 @@ namespace SHA3Visualization
             {
                 case Key.Up:
                     CameraPhi += CameraDPhi;
-                    if (CameraPhi > Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+                    if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
                     break;
                 case Key.Down:
                     CameraPhi -= CameraDPhi;
-                    if (CameraPhi < -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
+                    if (CameraPhi <  -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
                     break;
                 case Key.Left:
                     CameraTheta += CameraDTheta;
@@ -221,22 +180,25 @@ namespace SHA3Visualization
 
         private void SHA3Visualizer_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // Make the normal and selected materials.
-            NormalMaterial = new DiffuseMaterial(SelectedBrush("0"));
-            SelectedMaterial = new DiffuseMaterial(SelectedBrush("0",true));
+            
 
             // Deselect the prevously selected model.
             if (SelectedModel != null)
             {
+                var value = SelectableModels[SelectedModel];
+
+                // Make the normal and selected materials.
+                NormalMaterial = new DiffuseMaterial(SelectedBrush(value));
+                
                 SelectedModel
                     .Material = NormalMaterial;
 
                 //back site of number
-                var index = SelectableModels.IndexOf(SelectedModel);
+                var index = SelectableModels[SelectedModel].IndexOf(value);
                 if (SelectedModel.Bounds.Z % 2 == 0)
-                    SelectedModel = SelectableModels.ElementAt(index + 1);
+                    SelectedModel = SelectableModels.ElementAt(index + 1).Key;
                 else
-                    SelectedModel = SelectableModels.ElementAt(index - 1);
+                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
 
                 SelectedModel.Material = NormalMaterial;
                 SelectedModel = null;
@@ -255,17 +217,22 @@ namespace SHA3Visualization
             if (mesh_result != null)
             {
                 GeometryModel3D model = (GeometryModel3D)mesh_result.ModelHit;
-                if (SelectableModels.Contains(model))
+                if (SelectableModels.ContainsKey(model))
                 {
                     SelectedModel = model;
                     SelectedModel.Material = SelectedMaterial;
-                    
+
+                    var value = SelectableModels[SelectedModel];
+
+                    // Make the selected materials.
+                    SelectedMaterial = new DiffuseMaterial(SelectedBrush(value, true));
+
                     //back site of number selection
-                    var index = SelectableModels.IndexOf(SelectedModel);
-                    if (SelectedModel.Bounds.Z%2 == 0)
-                        SelectedModel = SelectableModels.ElementAt(index + 1);
+                    var index = SelectableModels[SelectedModel].IndexOf(value);
+                    if (SelectedModel.Bounds.Z % 2 == 0)
+                        SelectedModel = SelectableModels.ElementAt(index + 1).Key;
                     else
-                        SelectedModel = SelectableModels.ElementAt(index - 1);
+                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
 
                     SelectedModel.Material = SelectedMaterial;
                 }
@@ -289,6 +256,56 @@ namespace SHA3Visualization
             var alghorithm = new SHA3.SHA3(224);
             byte[] data = { };
             alghorithm.ComputeHash(data);
+            RefreshModelView();
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+
+            switch (presentationMenuComboBox.SelectedValue)
+            {
+            case "State":
+                StateCubePresetation();
+                break;
+            case "Slice":
+                SlicePresetation();
+                break;
+            case "Lane":
+                LanePresetation();
+                break;
+            case "Row":
+                RowPresetation();
+                break;
+            case "Column":
+                ColumnPresentation();
+                break;
+            case "Hash Example":
+                PerformHashing();
+                break;
+            default:
+                    break;
+            }
+
+        }
+
+        private void ComboBoxDynamicFill()
+        {
+            List<string> listOfContent = new List<string>
+            {
+                "State",
+                "Slice",
+                "Lane",
+                "Row",
+                "Column",
+                "Hash Example"
+            };
+
+            foreach (var content in listOfContent)
+            {
+                presentationMenuComboBox.Items.Add(content);
+            }
+
         }
 
         private Brush SelectedBrush(string value, bool selected = false)
@@ -306,6 +323,95 @@ namespace SHA3Visualization
             bitmap.Render(viewBox);
 
             return new ImageBrush(bitmap);
+        }
+
+        private void StateCubePresetation()
+        {
+            //Preparing Cube
+            //cube = new Cube(8,new byte[]{});
+
+            var sth = "abc";
+
+            //Preparing Cube
+            cube = new Cube(8, Encoding.ASCII.GetBytes(sth));
+
+            RefreshModelView();
+        }
+
+        private void SlicePresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(1, new byte[] { });
+
+            RefreshModelView();
+            
+        }
+
+        private void LanePresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(1,1,8, new byte[] { });
+
+            RefreshModelView();
+
+        }
+
+        private void RowPresetation()
+        {
+            //Preparing Cube
+            cube = new Cube(5, 1, 1, new byte[] { });
+
+            RefreshModelView();
+
+        }
+
+        private void plusX_Click(object sender, RoutedEventArgs e)
+        {
+            CameraPhi += CameraDPhi;
+            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void minusX_Click(object sender, RoutedEventArgs e)
+        {
+            CameraPhi -= CameraDPhi;
+            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void plusY_Click(object sender, RoutedEventArgs e)
+        {
+            CameraTheta += CameraDTheta;
+            PositionCamera();
+        }
+
+        private void minusY_Click(object sender, RoutedEventArgs e)
+        {
+            CameraTheta -= CameraDTheta;
+            PositionCamera();
+        }
+
+        private void plusZ_Click(object sender, RoutedEventArgs e)
+        {
+            CameraR += 10*CameraDR;
+            PositionCamera();
+        }
+
+        private void minusZ_Click(object sender, RoutedEventArgs e)
+        {
+            CameraR -= 10*CameraDR;
+            PositionCamera();
+        }
+
+        private void ColumnPresentation()
+        {
+            var sth = "abc";
+
+            //Preparing Cube
+            cube = new Cube(1, 5, 1, Encoding.ASCII.GetBytes(sth));
+
+            RefreshModelView();
+
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -29,8 +30,7 @@ namespace SHA3Visualization
         private Material NormalMaterial, SelectedMaterial;
 
         // The list of selectable models.
-        private List<GeometryModel3D> SelectableModels =
-            new List<GeometryModel3D>();
+        private Dictionary<GeometryModel3D,string> SelectableModels = new Dictionary<GeometryModel3D, string>();
 
         //delegate
         private delegate Brush ActionBrush(string value);
@@ -46,12 +46,17 @@ namespace SHA3Visualization
             DefineModel(5,5,size, values);
         }
 
+        public Cube(int x, int y, int z, byte[] values)
+        {
+            DefineModel(x, y, z, values);
+        }
+
         public Model3DGroup ReturnMainModel()
         {
             return MainModel3Dgroup;
         }
 
-        public List<GeometryModel3D> ReturnListOfModels()
+        public Dictionary<GeometryModel3D, string> ReturnListOfModels()
         {
             return SelectableModels;
         }
@@ -66,16 +71,18 @@ namespace SHA3Visualization
             NormalMaterial = new DiffuseMaterial(Brushes.LightGreen);
             SelectedMaterial = new DiffuseMaterial(Brushes.Red);
 
+            var bits = new BitArray(values);
             List<string> listString = new List<string>();
 
-            for(var i=0; i<values.Length; i++)
+            for(var i=0; i<bits.Length; i++)
             {
-                var builder = new StringBuilder(values.Length);
-                builder.Append(values[i].ToString("X2"));
+                var builder = new StringBuilder(bits.Length);
+                if (bits[i]) builder.Append("1"); else builder.Append("0");
                 listString.Add(builder.ToString());
                 builder.Clear();
             }
-
+            //if empty list
+            if (listString.Count == 0) listString.Add("0");
 
             Action<float,float,float,float,float,float, string> actionFillCube = FillCube;
 
@@ -90,13 +97,14 @@ namespace SHA3Visualization
 
             //list iterator
             var listIterator = 0;
+
+            // Create cubes.
             
-            // Create some cubes.
-            for (int x = -(width); x < (width); x += 2)
+            for (int x =2; x < 2*(width)+2; x += 2)
             {
-                for (int y = -(heigth); y < (heigth) ; y += 2)
+                for (int y =2; y < 2*(heigth)+2 ; y += 2)
                 {
-                    for (int z = -(depth); z < (depth); z += 2)
+                    for (int z = 2; z < 2*(depth)+2; z += 2)
                     {
                         // Make a cube with lower left corner (x, y, z).
                         //Task.Run(() =>
@@ -109,24 +117,20 @@ namespace SHA3Visualization
 
             // X axis.
             MeshGeometry3D mesh_x = MeshExtensions.XAxisArrow(6);
-           // MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-          //  {
+
                 MainModel3Dgroup.Children.Add(mesh_x.SetMaterial(Brushes.Red, false));
-           // }));
             
             // Y axis.
             MeshGeometry3D mesh_y = MeshExtensions.YAxisArrow(6);
-          //  MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-          //  {
+
                 MainModel3Dgroup.Children.Add(mesh_y.SetMaterial(Brushes.Green, false));
-           // }));
+
 
             // Z axis.
             MeshGeometry3D mesh_z = MeshExtensions.ZAxisArrow(6);
-          //  MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
-           // {
+
                 MainModel3Dgroup.Children.Add(mesh_z.SetMaterial(Brushes.Blue, false));
-            //}));
+
         }
 
         public void FillCube( float x, float y, float z, float dx, float dy, float dz, string value)
@@ -151,7 +155,7 @@ namespace SHA3Visualization
                //}));
 
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d);
+                SelectableModels.Add(geommodel3d, value);
             }
 
             // Back
@@ -163,13 +167,13 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z));
                 AddingMeshProperties(ref mesh);
                 GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)), value)));
+                
                 //GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
                 //MainModel3Dgroup.Dispatcher.Invoke(new Action(() => { 
                 MainModel3Dgroup.Children.Add(geommodel3d); //}));
-                // MainModel3Dgroup.Children.Add(geommodel3d);
-
+                
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d);
+                SelectableModels.Add(geommodel3d, value);
 
             }
 
@@ -251,7 +255,7 @@ namespace SHA3Visualization
 
         private Brush PrepareBrush(string value)
         { 
-            TextBlock textBlock = new TextBlock() { Text = value, Background = Brushes.Transparent };
+            TextBlock textBlock = new TextBlock() { Text = value, Background = value == "1" ? Brushes.LawnGreen: Brushes.Yellow };
             Size size = new Size(40, 40);
             Viewbox viewBox = new Viewbox();
             viewBox.Child = textBlock;
