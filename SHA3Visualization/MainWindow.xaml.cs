@@ -78,6 +78,9 @@ namespace SHA3Visualization
             // Define lights.
             DefineLights(MainModel3Dgroup);
 
+            //Fill up for menu ComboBox
+            ComboBoxDynamicFill();
+
             // Create the model.
             //PerformHashing();
             // StateCubePresetation();
@@ -89,6 +92,10 @@ namespace SHA3Visualization
 
         public void RefreshModelView()
         {
+            // clear out the existing geometry XAML
+            MainModel3Dgroup.Children.Clear();
+            MainTabView.Children.Clear();
+
             //Collection of Models
             SelectableModels = (cube != null) ? cube.ReturnListOfModels() : null;
 
@@ -103,25 +110,6 @@ namespace SHA3Visualization
         }
 
         #endregion
-
-        private void VerticalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            TheCamera.Transform =
-                new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), VerticalScrollBar.Value));
-        }
-
-        private void HorizontalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            TheCamera.Transform =
-                new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), HorizontalScrollBar.Value));
-        }
-
-
-        private void ZoomScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-        //    Cube.Transform =
-        //        new ScaleTransform3D(ZoomScrollBar.Value, ZoomScrollBar.Value, ZoomScrollBar.Value);
-        }
 
 
         // Position the camera.
@@ -268,6 +256,7 @@ namespace SHA3Visualization
             var alghorithm = new SHA3.SHA3(224);
             byte[] data = { };
             alghorithm.ComputeHash(data);
+            RefreshModelView();
         }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -276,15 +265,47 @@ namespace SHA3Visualization
 
             switch (presentationMenuComboBox.SelectedValue)
             {
-
-                default:
-                    //StateCubePresetation();
-                    //SlicePresetation();
-                    //LanePresetation();
-                    //RowPresetation();
-                    ColumnPresentation();
+            case "State":
+                StateCubePresetation();
+                break;
+            case "Slice":
+                SlicePresetation();
+                break;
+            case "Lane":
+                LanePresetation();
+                break;
+            case "Row":
+                RowPresetation();
+                break;
+            case "Column":
+                ColumnPresentation();
+                break;
+            case "Hash Example":
+                PerformHashing();
+                break;
+            default:
                     break;
             }
+
+        }
+
+        private void ComboBoxDynamicFill()
+        {
+            List<string> listOfContent = new List<string>
+            {
+                "State",
+                "Slice",
+                "Lane",
+                "Row",
+                "Column",
+                "Hash Example"
+            };
+
+            foreach (var content in listOfContent)
+            {
+                presentationMenuComboBox.Items.Add(content);
+            }
+
         }
 
         private Brush SelectedBrush(string value, bool selected = false)
@@ -307,8 +328,13 @@ namespace SHA3Visualization
         private void StateCubePresetation()
         {
             //Preparing Cube
-            cube = new Cube(8,new byte[]{});
-            
+            //cube = new Cube(8,new byte[]{});
+
+            var sth = "abc";
+
+            //Preparing Cube
+            cube = new Cube(8, Encoding.ASCII.GetBytes(sth));
+
             RefreshModelView();
         }
 
@@ -337,6 +363,44 @@ namespace SHA3Visualization
 
             RefreshModelView();
 
+        }
+
+        private void plusX_Click(object sender, RoutedEventArgs e)
+        {
+            CameraPhi += CameraDPhi;
+            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void minusX_Click(object sender, RoutedEventArgs e)
+        {
+            CameraPhi -= CameraDPhi;
+            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void plusY_Click(object sender, RoutedEventArgs e)
+        {
+            CameraTheta += CameraDTheta;
+            PositionCamera();
+        }
+
+        private void minusY_Click(object sender, RoutedEventArgs e)
+        {
+            CameraTheta -= CameraDTheta;
+            PositionCamera();
+        }
+
+        private void plusZ_Click(object sender, RoutedEventArgs e)
+        {
+            CameraR += 10*CameraDR;
+            PositionCamera();
+        }
+
+        private void minusZ_Click(object sender, RoutedEventArgs e)
+        {
+            CameraR -= 10*CameraDR;
+            PositionCamera();
         }
 
         private void ColumnPresentation()

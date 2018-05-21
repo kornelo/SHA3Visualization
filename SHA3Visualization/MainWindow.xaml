@@ -5,32 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SHA3Visualization"
         mc:Ignorable="d"
-        Title="SHA-3 Visualizer" Height="796" Width="1200" Loaded="SHA3Visualizer_Loaded"  MouseDown="SHA3Visualizer_MouseDown">
+        Title="SHA-3 Visualizer" Height="796" Width="1200" Loaded="SHA3Visualizer_Loaded"  MouseDown="SHA3Visualizer_MouseDown" KeyDown="SHA3Visualizer_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="531*"/>
             <ColumnDefinition Width="661*"/>
         </Grid.ColumnDefinitions>
-        <TabControl HorizontalAlignment="Left" Height="745" VerticalAlignment="Top" Width="1172" Margin="10,10,0,0" Grid.ColumnSpan="2">
+        <TabControl HorizontalAlignment="Left" Height="auto" VerticalAlignment="Top" Width="auto" Margin="10,10,0,0" Grid.ColumnSpan="2" KeyDown="SHA3Visualizer_KeyDown">
             <TabItem Header="TabItem">
-                <Grid x:Name="Tab" Background="#FFE5E5E5">
-                    <Border Margin="0,27,0,0">
-                        <Viewport3D x:Name="MainTabView" Margin="0,25,0,0" KeyDown="SHA3Visualizer_KeyDown">
-                            
-                        </Viewport3D>  
+                <Grid x:Name="Tab" Background="#FFE5E5E5" Height="557" Width="1162">
+                    <Border Margin="0,27,0,10">
+                        <Viewport3D x:Name="MainTabView" Margin="0,0,10,0" />
                     </Border>
-                    <ScrollBar x:Name="HorizontalScrollBar" HorizontalAlignment="Center" Height="30" Margin="10,685,0,0" VerticalAlignment="Center" Width="1050" Orientation="Horizontal" Minimum="-180" Maximum="181" ValueChanged="HorizontalScrollBar_ValueChanged"/>
-                    <ScrollBar x:Name="VerticalScrollBar" HorizontalAlignment="Left" Height="660" Margin="1130,10,0,0" VerticalAlignment="Center" Width="30" Minimum="-180" Maximum="180" ValueChanged="VerticalScrollBar_ValueChanged"/>
-                    <ScrollBar x:Name="ZoomScrollBar" HorizontalAlignment="Left" Height="34" Margin="29,10,0,0" VerticalAlignment="Top" Width="124" Maximum="15" Minimum="-15" ValueChanged="ZoomScrollBar_ValueChanged" Orientation="Horizontal"/>
-                    <ComboBox x:Name="presentationMenuComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="423" Margin="672,5,0,0" SelectionChanged="ComboBox_SelectionChanged">
-                           <ComboBoxItem Content="Cube state"></ComboBoxItem>
-                    </ComboBox>
-                    <TextBox x:Name="xValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="251,5,0,0"/>
-                    <TextBox x:Name="yValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="308,4,0,0"/>
-                    <TextBox x:Name="zValue" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="52" Margin="365,5,0,0"/>
+                    <ComboBox x:Name="presentationMenuComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="423" Margin="672,5,0,0" SelectionChanged="ComboBox_SelectionChanged"/>
 
                 </Grid>
             </TabItem>
         </TabControl>
+        <TextBox x:Name="xValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="X " VerticalAlignment="Top" Width="80" Margin="10,627,0,0"/>
+        <TextBox x:Name="yValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="Y" VerticalAlignment="Top" Width="80" Margin="10,662,0,0" RenderTransformOrigin="0.467,0.522"/>
+        <TextBox x:Name="zValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="Z" VerticalAlignment="Top" Width="80" Margin="10,697,0,0"/>
+        <Button x:Name="plusZ" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,697,0,0" VerticalAlignment="Top" Width="30" Click="plusZ_Click"/>
+        <Button x:Name="plusY" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,662,0,0" VerticalAlignment="Top" Width="30" Click="plusY_Click"/>
+        <Button x:Name="plusX" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,627,0,0" VerticalAlignment="Top" Width="30" Click="plusX_Click"/>
+        <Button x:Name="minusZ" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,697,0,0" VerticalAlignment="Top" Width="30" Click="minusZ_Click"/>
+        <Button x:Name="minusY" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,662,0,0" VerticalAlignment="Top" Width="30" Click="minusY_Click"/>
+        <Button x:Name="minusX" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,627,0,0" VerticalAlignment="Top" Width="30" Click="minusX_Click"/>
     </Grid>
 </Window>

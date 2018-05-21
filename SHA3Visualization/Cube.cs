@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -70,17 +71,18 @@ namespace SHA3Visualization
             NormalMaterial = new DiffuseMaterial(Brushes.LightGreen);
             SelectedMaterial = new DiffuseMaterial(Brushes.Red);
 
+            var bits = new BitArray(values);
             List<string> listString = new List<string>();
 
-            for(var i=0; i<values.Length; i++)
+            for(var i=0; i<bits.Length; i++)
             {
-                var builder = new StringBuilder(values.Length);
-                builder.Append(values[i].ToString("X2"));
+                var builder = new StringBuilder(bits.Length);
+                if (bits[i]) builder.Append("1"); else builder.Append("0");
                 listString.Add(builder.ToString());
                 builder.Clear();
             }
             //if empty list
-            if (listString.Count == 0) listString.Add("00");
+            if (listString.Count == 0) listString.Add("0");
 
             Action<float,float,float,float,float,float, string> actionFillCube = FillCube;
 
@@ -253,7 +255,7 @@ namespace SHA3Visualization
 
         private Brush PrepareBrush(string value)
         { 
-            TextBlock textBlock = new TextBlock() { Text = value, Background = Brushes.Transparent };
+            TextBlock textBlock = new TextBlock() { Text = value, Background = value == "1" ? Brushes.LawnGreen: Brushes.Yellow };
             Size size = new Size(40, 40);
             Viewbox viewBox = new Viewbox();
             viewBox.Child = textBlock;
