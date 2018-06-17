@@ -56,10 +56,7 @@ namespace SHA3Visualization.SHA3
         /// <summary>
         /// Gets the number of iterations of a single internal permutation.
         /// </summary>
-        public int RoundCount
-        {
-            get { return _roundCount; }
-        }
+        public int RoundCount => _roundCount;
 
         /// <summary>
         /// Creates a new <see cref="KeccakPermutation"/> specifying its size, rate and number of iterations of a single

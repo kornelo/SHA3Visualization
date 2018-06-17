@@ -36,18 +36,12 @@ namespace SHA3Visualization.SHA3
         /// <summary>
         /// Gets an <see cref="IHashCoder{T}"/> using <see cref="BoostHashCoder{T}"/> algorithm.
         /// </summary>
-        public static IHashCoder<T> Boost
-        {
-            get { return BoostHashCoder<T>.Instance; }
-        }
+        public static IHashCoder<T> Boost => BoostHashCoder<T>.Instance;
 
         /// <summary>
         /// Gets an <see cref="IHashCoder{T}"/> using <see cref="DefaultHashCoder{T}"/> algorithm.
         /// </summary>
-        public static IHashCoder<T> Default
-        {
-            get { return DefaultHashCoder<T>.Instance; }
-        }
+        public static IHashCoder<T> Default => DefaultHashCoder<T>.Instance;
 
         /// <summary>
         /// Returns a hash code for specified collection of values.

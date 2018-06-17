@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SHA3Visualization.SHA3
 {
@@ -44,7 +43,7 @@ namespace SHA3Visualization.SHA3
 
             #region Fields
 
-            private static readonly Regex _bitstringRegex
+            private static readonly Regex BitstringRegex
                 = new Regex(@"^[01\s]*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
             private byte[] _data;
@@ -77,26 +76,17 @@ namespace SHA3Visualization.SHA3
             /// <summary>
             /// Gets the number of blocks of <see cref="BlockBitSize"/> of this bitstring.
             /// </summary>
-            public int BlockCount
-            {
-                get { return _data.Length; }
-            }
+            public int BlockCount => _data.Length;
 
             /// <summary>
             /// Gets the byte array which hold the bits of this bitstring.
             /// </summary>
-            public byte[] Bytes
-            {
-                get { return _data; }
-            }
+            public byte[] Bytes => _data;
 
             /// <summary>
             /// Gets the number of bits in this bitstring.
             /// </summary>
-            public int Length
-            {
-                get { return _length; }
-            }
+            public int Length => _length;
 
             /// <summary>
             /// Gets or sets the bit at specified index in this bitstring.
@@ -113,10 +103,10 @@ namespace SHA3Visualization.SHA3
                     {
                         throw new ArgumentOutOfRangeException(nameof(index));
                     }
-                    int blockIndex = index >> Shift;
-                    int bitOffset = index % BlockBitSize;
-                    byte chunk = _data[blockIndex];
-                    byte mask = (byte)(1 << bitOffset);
+                    var blockIndex = index >> Shift;
+                    var bitOffset = index % BlockBitSize;
+                    var chunk = _data[blockIndex];
+                    var mask = (byte)(1 << bitOffset);
                     return ((chunk & mask) == mask);
                 }
                 set
@@ -125,10 +115,9 @@ namespace SHA3Visualization.SHA3
                     {
                         throw new ArgumentOutOfRangeException(nameof(index));
                     }
-                    int blockIndex = index >> Shift;
-                    int bitOffset = index % BlockBitSize;
-                    byte chunk = _data[blockIndex];
-                    byte mask = (byte)(1 << bitOffset);
+                    var blockIndex = index >> Shift;
+                    var bitOffset = index % BlockBitSize;
+                    var mask = (byte)(1 << bitOffset);
                     if (value)
                     {
                         _data[blockIndex] |= mask;
@@ -173,7 +162,7 @@ namespace SHA3Visualization.SHA3
             public Bitstring(Bitstring bitstring)
             {
                 bitstring = bitstring ?? throw new ArgumentNullException(nameof(bitstring));
-                int count = bitstring.BlockCount;
+                var count = bitstring.BlockCount;
                 _data = new byte[count];
                 Array.Copy(bitstring._data, 0, _data, 0, count);
                 _length = bitstring._length;
@@ -203,9 +192,9 @@ namespace SHA3Visualization.SHA3
             {
                 if (ValidateAndSanitize(ref bits, ref length))
                 {
-                    int count = (int)Math.Ceiling((double)length / BlockBitSize);
+                    var count = (int)Math.Ceiling((double)length / BlockBitSize);
                     _data = new byte[count];
-                    int left = bits.Length;
+                    var left = bits.Length;
                     int i;
                     // Stop the loop either when there is less than 8 bits to parse, or when desired length exceeds the size of
                     // specified string.
@@ -239,8 +228,8 @@ namespace SHA3Visualization.SHA3
             {
                 // Sanity checks
                 data = data ?? throw new ArgumentNullException(nameof(data));
-                int count = data.Length;
-                int bitCount = count << Shift;
+                var count = data.Length;
+                var bitCount = count << Shift;
                 _length = (length < 0) ? bitCount : length;
                 if (_length > bitCount)
                 {
@@ -284,7 +273,7 @@ namespace SHA3Visualization.SHA3
             /// </summary>
             /// <param name="lhs">The bitstring to compare to <paramref name="rhs"/>.</param>
             /// <param name="rhs">The bitstring to compare to <paramref name="lhs"/>.</param>
-            /// <returns>True if <paramref name="lhs"/> and <paramref name="rhs"/> differ either by their length or internal
+            /// <returns/>True if <paramref name="lhs"/> and <paramref name="rhs"/> differ either by their length or internal
             /// data, otherwise false.
             public static bool operator !=(Bitstring lhs, Bitstring rhs)
             {
@@ -406,29 +395,26 @@ namespace SHA3Visualization.SHA3
             /// </remarks>
             public Bitstring Append(IEnumerable<bool> bits)
             {
-                int count = bits?.Count() ?? 0;
-                if (count > 0)
+                var enumerable = bits as bool[] ?? bits.ToArray();
+                var count = enumerable?.Count() ?? 0;
+                if (count <= 0) return this;
+                var blockIndex = _length >> Shift;
+                var bitOffset = _length % BlockBitSize;
+                _length += count;
+                var newBlockCount = (int)Math.Ceiling((double)_length / BlockBitSize);
+                if (newBlockCount > BlockCount)
                 {
-                    int blockIndex = _length >> Shift;
-                    int bitOffset = _length % BlockBitSize;
-                    _length += count;
-                    int newBlockCount = (int)Math.Ceiling((double)_length / BlockBitSize);
-                    if (newBlockCount > BlockCount)
+                    Array.Resize(ref _data, newBlockCount);
+                }
+                foreach (var bit in enumerable)
+                {
+                    if (bit)
                     {
-                        Array.Resize(ref _data, newBlockCount);
+                        _data[blockIndex] |= (byte)(1 << bitOffset);
                     }
-                    foreach (bool bit in bits)
-                    {
-                        if (bit)
-                        {
-                            _data[blockIndex] |= (byte)(1 << bitOffset);
-                        }
-                        if (++bitOffset > 7)
-                        {
-                            bitOffset = 0;
-                            blockIndex++;
-                        }
-                    }
+                    if (++bitOffset <= 7) continue;
+                    bitOffset = 0;
+                    blockIndex++;
                 }
                 return this;
             }
@@ -544,7 +530,10 @@ namespace SHA3Visualization.SHA3
             /// Prepends specified byte array to the start of this bitstring and returns the result.
             /// </summary>
             /// <param name="bytes">The byte array to add to the start of this bitstring.</param>
-            /// <returns>This bitstring to which has been prepended <paramref name="bits"/>.</returns>
+            /// <returns>This bitstring to which has been prepended <paramref>
+            ///         <name>bits</name>
+            ///     </paramref>
+            ///     .</returns>
             /// <remarks>This method modifies current instance and returns it, so that calls can eventually be chained.
             /// </remarks>
             public Bitstring Prepend(byte[] bytes)
@@ -862,7 +851,7 @@ namespace SHA3Visualization.SHA3
                 bool ok = (bits != null);
                 if (ok)
                 {
-                    ok = _bitstringRegex.IsMatch(bits);
+                    ok = BitstringRegex.IsMatch(bits);
                     if (ok && bits.Contains(" "))
                     {
                         bits = bits.Replace(" ", "");

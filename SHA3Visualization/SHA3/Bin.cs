@@ -7,8 +7,8 @@ namespace SHA3Visualization.SHA3
     /// </summary>
     public static class Bin
     {
-        private static readonly int[] _b = new int[] { 2, 12, 240, 65280, -65536 };
-        private static readonly int[] _s = new int[] { 1, 2, 4, 8, 16 };
+        private static readonly int[] B = new int[] { 2, 12, 240, 65280, -65536 };
+        private static readonly int[] S = new int[] { 1, 2, 4, 8, 16 };
 
         /// <summary>
         /// Returns the base-2 logarithm of a 32-bits signed integer value.
@@ -17,14 +17,12 @@ namespace SHA3Visualization.SHA3
         /// <returns>The base-2 logarithm of <paramref name="value"/>.</returns>
         public static int Log2(int value)
         {
-            int log = 0;
-            for (int i = 4; i > -1; i--)
+            var log = 0;
+            for (var i = 4; i > -1; i--)
             {
-                if ((value & _b[i]) != 0)
-                {
-                    value >>= _s[i];
-                    log |= _s[i];
-                }
+                if ((value & B[i]) == 0) continue;
+                value >>= S[i];
+                log |= S[i];
             }
             return log;
         }
@@ -37,19 +35,17 @@ namespace SHA3Visualization.SHA3
         public static byte LowerMask(int count)
         {
             byte value = 0;
-            if (count > 0)
+            if (count <= 0) return value;
+            count %= 8;
+            if (count == 0)
             {
-                count %= 8;
-                if (count == 0)
+                value = 255;
+            }
+            else
+            {
+                for (var i = 0; i < count; i++)
                 {
-                    value = 255;
-                }
-                else
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        value |= (byte)(1 << i);
-                    }
+                    value |= (byte)(1 << i);
                 }
             }
             return value;
