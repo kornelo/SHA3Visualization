@@ -140,12 +140,13 @@ namespace SHA3Visualization.SHA3
                 inputLength = (inputLength > -1) ? inputLength : bytes.Length << Bitstring.Shift;
                 Absorb(bytes, inputLength);
                 var currentMainWindow = (MainWindow)Application.Current.MainWindow;
-                if (currentMainWindow != null && currentMainWindow.Cube == null)
+                if (currentMainWindow != null && !currentMainWindow.HashedCube)
                 {
                     var mainWindow = (MainWindow) Application.Current.MainWindow;
                     if (mainWindow != null)
                         mainWindow.Cube =
                             new Cube(State.Size.W, State.Bitstring.Bytes);
+                    currentMainWindow.HashedCube=!currentMainWindow.HashedCube;
                 }
                 result = Squeeze(outputLength);
             }

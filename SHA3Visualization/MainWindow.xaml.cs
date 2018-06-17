@@ -42,6 +42,8 @@ namespace SHA3Visualization
         // public cube
         public Cube Cube;
 
+        public bool HashedCube;
+
         // The camera's current location.
         private double _cameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
         private double _cameraTheta =  8.0 * Math.PI / 18.0; // 30 degrees
@@ -341,33 +343,41 @@ namespace SHA3Visualization
             Cube = new Cube(8, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
+
+            HashedCube = true?!HashedCube:HashedCube;
         }
 
         private void SlicePresetation()
         {
+            const string sth = "abc";
+
             //Preparing Cube
-            Cube = new Cube(1, new byte[] { });
+            Cube = new Cube(1, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
-            
+            HashedCube = true ? !HashedCube : HashedCube;
         }
 
         private void LanePresetation()
         {
+            const string sth = "abc";
+
             //Preparing Cube
-            Cube = new Cube(1,1,8, new byte[] { });
+            Cube = new Cube(1, 1, 8, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
-
+            HashedCube = true ? !HashedCube : HashedCube;
         }
 
         private void RowPresetation()
         {
+            const string sth = "abc";
+
             //Preparing Cube
-            Cube = new Cube(5, 1, 1, new byte[] { });
+            Cube = new Cube(5, 1, 1, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
-
+            HashedCube = true ? !HashedCube : HashedCube;
         }
 
         private void ColumnPresentation()
@@ -378,7 +388,7 @@ namespace SHA3Visualization
             Cube = new Cube(1, 5, 1, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
-
+            HashedCube = true ? !HashedCube : HashedCube;
         }
 
         private void PlusX_Click(object sender, RoutedEventArgs e)
