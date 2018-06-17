@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,18 +34,18 @@ namespace SHA3Visualization
         #region Initializations
 
         // The main object model group.
-        private Model3DGroup MainModel3Dgroup = new Model3DGroup();
+        internal Model3DGroup MainModel3Dgroup = new Model3DGroup();
 
         // The camera.
-        private PerspectiveCamera TheCamera;
+        private PerspectiveCamera _theCamera;
 
         // public cube
-        public Cube cube;
+        public Cube Cube;
 
         // The camera's current location.
-        private double CameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
-        private double CameraTheta =  8.0 * Math.PI / 18.0; // 30 degrees
-        private double CameraR = 30.0;
+        private double _cameraPhi = 14.5 * Math.PI / 18.0; // 30 degrees
+        private double _cameraTheta =  8.0 * Math.PI / 18.0; // 30 degrees
+        private double _cameraR = 30.0;
 
         // The change in CameraPhi when you press the up and down arrows.
         private const double CameraDPhi = 0.1;
@@ -53,26 +54,26 @@ namespace SHA3Visualization
         private const double CameraDTheta = 0.1;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1;
+        private const double CameraDr = 0.1;
 
         // The currently selected model.
-        private GeometryModel3D SelectedModel;
+        private GeometryModel3D _selectedModel;
 
         // Materials used for normal and selected models.
-        private Material NormalMaterial, SelectedMaterial;
+        private Material _normalMaterial, _selectedMaterial;
 
         // The list of selectable models.
-        private Dictionary<GeometryModel3D, string> SelectableModels;
+        private Dictionary<GeometryModel3D, string> _selectableModels;
 
         private void SHA3Visualizer_Loaded(object sender, RoutedEventArgs e)
         {
 
             // Give the camera its initial position.
-            TheCamera = new PerspectiveCamera
+            _theCamera = new PerspectiveCamera
             {
                 FieldOfView = 60
             };
-            MainTabView.Camera = TheCamera;
+            MainTabView.Camera = _theCamera;
             PositionCamera();
 
             // Define lights.
@@ -97,12 +98,12 @@ namespace SHA3Visualization
             MainTabView.Children.Clear();
 
             //Collection of Models
-            SelectableModels = (cube != null) ? cube.ReturnListOfModels() : null;
+            _selectableModels = Cube?.ReturnListOfModels();
 
             // Add the group of models to a ModelVisual3D.
             ModelVisual3D model_visual = new ModelVisual3D
             {
-                Content = (cube != null) ? cube.ReturnMainModel() : null
+                Content = Cube?.ReturnMainModel()
             };
 
             // Display the main visual to the viewportt.
@@ -116,26 +117,26 @@ namespace SHA3Visualization
         private void PositionCamera()
         {
             // Calculate the camera's position in Cartesian coordinates.
-            double y = CameraR * Math.Sin(CameraPhi);
-            double hyp = CameraR * Math.Cos(CameraPhi);
-            double x = hyp * Math.Cos(CameraTheta);
-            double z = hyp * Math.Sin(CameraTheta);
+            double y = _cameraR * Math.Sin(_cameraPhi);
+            double hyp = _cameraR * Math.Cos(_cameraPhi);
+            double x = hyp * Math.Cos(_cameraTheta);
+            double z = hyp * Math.Sin(_cameraTheta);
 
             // Moving camera
-            double xMove = 6;
-            double yMove = 7;
-            double zMove = 0;
+            const double xMove = 6;
+            const double yMove = 7;
+            const double zMove = 0;
 
-            TheCamera.Position = new Point3D(x +xMove , y + yMove, z + zMove);
+            _theCamera.Position = new Point3D(x +xMove , y + yMove, z + zMove);
 
             // Look toward the origin.
-            TheCamera.LookDirection = new Vector3D(-x , -y, -z);
+            _theCamera.LookDirection = new Vector3D(-x , -y, -z);
 
             // Set the Up direction.
 
-            xValue.Text = TheCamera.Position.X.ToString();
-            yValue.Text = TheCamera.Position.Y.ToString();
-            zValue.Text = TheCamera.Position.Z.ToString();
+            xValue.Text = _theCamera.Position.X.ToString(CultureInfo.InvariantCulture);
+            yValue.Text = _theCamera.Position.Y.ToString(CultureInfo.InvariantCulture);
+            zValue.Text = _theCamera.Position.Z.ToString(CultureInfo.InvariantCulture);
 
         }
 
@@ -150,27 +151,27 @@ namespace SHA3Visualization
             switch (e.Key)
             {
                 case Key.Up:
-                    CameraPhi += CameraDPhi;
-                    if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+                    _cameraPhi += CameraDPhi;
+                    if (_cameraPhi < Math.PI / 2.0) _cameraPhi = Math.PI / 2.0;
                     break;
                 case Key.Down:
-                    CameraPhi -= CameraDPhi;
-                    if (CameraPhi <  -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
+                    _cameraPhi -= CameraDPhi;
+                    if (_cameraPhi <  -Math.PI / 2.0) _cameraPhi = -Math.PI / 2.0;
                     break;
                 case Key.Left:
-                    CameraTheta += CameraDTheta;
+                    _cameraTheta += CameraDTheta;
                     break;
                 case Key.Right:
-                    CameraTheta -= CameraDTheta;
+                    _cameraTheta -= CameraDTheta;
                     break;
                 case Key.Add:
                 case Key.OemPlus:
-                    CameraR -= CameraDR;
-                    if (CameraR < CameraDR) CameraR = CameraDR;
+                    _cameraR -= CameraDr;
+                    if (_cameraR < CameraDr) _cameraR = CameraDr;
                     break;
                 case Key.Subtract:
                 case Key.OemMinus:
-                    CameraR += CameraDR;
+                    _cameraR += CameraDr;
                     break;
             }
 
@@ -183,69 +184,69 @@ namespace SHA3Visualization
             
 
             // Deselect the prevously selected model.
-            if (SelectedModel != null)
+            if (_selectedModel != null)
             {
-                var value = SelectableModels[SelectedModel];
+                var value = _selectableModels[_selectedModel];
 
                 // Make the normal and selected materials.
-                NormalMaterial = new DiffuseMaterial(SelectedBrush(value));
+                _normalMaterial = new DiffuseMaterial(SelectedBrush(value));
                 
-                SelectedModel
-                    .Material = NormalMaterial;
+                _selectedModel
+                    .Material = _normalMaterial;
 
                 //back site of number
-                var index = SelectableModels[SelectedModel].IndexOf(value);
-                if (SelectedModel.Bounds.Z % 2 == 0)
-                    SelectedModel = SelectableModels.ElementAt(index + 1).Key;
+                var index = _selectableModels[_selectedModel].IndexOf(value, StringComparison.Ordinal);
+                if (Math.Abs(_selectedModel.Bounds.Z % 2) < 1)
+                    _selectedModel = _selectableModels.ElementAt(index + 1).Key;
                 else
-                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
+                    _selectedModel = _selectableModels.ElementAt(index - 1).Key;
 
-                SelectedModel.Material = NormalMaterial;
-                SelectedModel = null;
+                _selectedModel.Material = _normalMaterial;
+                _selectedModel = null;
             }
 
             // Get the mouse's position relative to the viewport.
-            Point mouse_pos = e.GetPosition(MainTabView);
+            Point mousePos = e.GetPosition(MainTabView);
 
             // Perform the hit test.
             HitTestResult result =
-                VisualTreeHelper.HitTest(MainTabView, mouse_pos);
+                VisualTreeHelper.HitTest(MainTabView, mousePos);
 
             // See if we hit a model.
-            RayMeshGeometry3DHitTestResult mesh_result =
+            RayMeshGeometry3DHitTestResult meshResult =
                 result as RayMeshGeometry3DHitTestResult;
-            if (mesh_result != null)
+            if (meshResult != null)
             {
-                GeometryModel3D model = (GeometryModel3D)mesh_result.ModelHit;
-                if (SelectableModels.ContainsKey(model))
+                GeometryModel3D model = (GeometryModel3D)meshResult.ModelHit;
+                if (_selectableModels.ContainsKey(model))
                 {
-                    SelectedModel = model;
-                    SelectedModel.Material = SelectedMaterial;
+                    _selectedModel = model;
+                    _selectedModel.Material = _selectedMaterial;
 
-                    var value = SelectableModels[SelectedModel];
+                    var value = _selectableModels[_selectedModel];
 
                     // Make the selected materials.
-                    SelectedMaterial = new DiffuseMaterial(SelectedBrush(value, true));
+                    _selectedMaterial = new DiffuseMaterial(SelectedBrush(value, true));
 
                     //back site of number selection
-                    var index = SelectableModels[SelectedModel].IndexOf(value);
-                    if (SelectedModel.Bounds.Z % 2 == 0)
-                        SelectedModel = SelectableModels.ElementAt(index + 1).Key;
+                    var index = _selectableModels[_selectedModel].IndexOf(value, StringComparison.Ordinal);
+                    if (Math.Abs(_selectedModel.Bounds.Z % 2) < 1)
+                        _selectedModel = _selectableModels.ElementAt(index + 1).Key;
                     else
-                    SelectedModel = SelectableModels.ElementAt(index - 1).Key;
+                    _selectedModel = _selectableModels.ElementAt(index - 1).Key;
 
-                    SelectedModel.Material = SelectedMaterial;
+                    _selectedModel.Material = _selectedMaterial;
                 }
             }
         }
 
-        private void DefineLights(Model3DGroup model_group)
+        private void DefineLights(Model3DGroup modelGroup)
         {
-            model_group.Children.Add(new AmbientLight(Colors.DarkSlateGray));
-            model_group.Children.Add(
+            modelGroup.Children.Add(new AmbientLight(Colors.DarkSlateGray));
+            modelGroup.Children.Add(
                 new DirectionalLight(Colors.Gray,
                     new Vector3D(3.0, -2.0, 1.0)));
-            model_group.Children.Add(
+            modelGroup.Children.Add(
                 new DirectionalLight(Colors.DarkGray,
                     new Vector3D(-3.0, -2.0, -1.0)));
         }
@@ -291,13 +292,17 @@ namespace SHA3Visualization
 
         private void ComboBoxDynamicFill()
         {
-            List<string> listOfContent = new List<string>
+            var listOfContent = new List<string>
             {
+                "---VISUALISATIONS---",
                 "State",
                 "Slice",
                 "Lane",
                 "Row",
                 "Column",
+                "---ALGHORITMS---",
+
+                "---EXAMPLE---",
                 "Hash Example"
             };
 
@@ -308,7 +313,7 @@ namespace SHA3Visualization
 
         }
 
-        private Brush SelectedBrush(string value, bool selected = false)
+        private static Brush SelectedBrush(string value, bool selected = false)
         {
             TextBlock textBlock; 
             if(selected) textBlock= new TextBlock() { Text = value, Background = new SolidColorBrush(Colors.GreenYellow) };
@@ -330,10 +335,10 @@ namespace SHA3Visualization
             //Preparing Cube
             //cube = new Cube(8,new byte[]{});
 
-            var sth = "abc";
+            const string sth = "abc";
 
             //Preparing Cube
-            cube = new Cube(8, Encoding.ASCII.GetBytes(sth));
+            Cube = new Cube(8, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
         }
@@ -341,7 +346,7 @@ namespace SHA3Visualization
         private void SlicePresetation()
         {
             //Preparing Cube
-            cube = new Cube(1, new byte[] { });
+            Cube = new Cube(1, new byte[] { });
 
             RefreshModelView();
             
@@ -350,7 +355,7 @@ namespace SHA3Visualization
         private void LanePresetation()
         {
             //Preparing Cube
-            cube = new Cube(1,1,8, new byte[] { });
+            Cube = new Cube(1,1,8, new byte[] { });
 
             RefreshModelView();
 
@@ -359,59 +364,61 @@ namespace SHA3Visualization
         private void RowPresetation()
         {
             //Preparing Cube
-            cube = new Cube(5, 1, 1, new byte[] { });
+            Cube = new Cube(5, 1, 1, new byte[] { });
 
             RefreshModelView();
 
-        }
-
-        private void plusX_Click(object sender, RoutedEventArgs e)
-        {
-            CameraPhi += CameraDPhi;
-            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
-            PositionCamera();
-        }
-
-        private void minusX_Click(object sender, RoutedEventArgs e)
-        {
-            CameraPhi -= CameraDPhi;
-            if (CameraPhi < Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
-            PositionCamera();
-        }
-
-        private void plusY_Click(object sender, RoutedEventArgs e)
-        {
-            CameraTheta += CameraDTheta;
-            PositionCamera();
-        }
-
-        private void minusY_Click(object sender, RoutedEventArgs e)
-        {
-            CameraTheta -= CameraDTheta;
-            PositionCamera();
-        }
-
-        private void plusZ_Click(object sender, RoutedEventArgs e)
-        {
-            CameraR += 10*CameraDR;
-            PositionCamera();
-        }
-
-        private void minusZ_Click(object sender, RoutedEventArgs e)
-        {
-            CameraR -= 10*CameraDR;
-            PositionCamera();
         }
 
         private void ColumnPresentation()
         {
-            var sth = "abc";
+            const string sth = "abc";
 
             //Preparing Cube
-            cube = new Cube(1, 5, 1, Encoding.ASCII.GetBytes(sth));
+            Cube = new Cube(1, 5, 1, Encoding.ASCII.GetBytes(sth));
 
             RefreshModelView();
 
         }
+
+        private void PlusX_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraPhi += CameraDPhi;
+            if (_cameraPhi < Math.PI / 2.0) _cameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void MinusX_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraPhi -= CameraDPhi;
+            if (_cameraPhi < Math.PI / 2.0) _cameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void PlusY_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraTheta += CameraDTheta;
+            PositionCamera();
+        }
+
+        private void MinusY_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraTheta -= CameraDTheta;
+            PositionCamera();
+        }
+
+        private void PlusZ_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraR += 10*CameraDr;
+            PositionCamera();
+        }
+
+        private void MinusZ_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraR -= 10*CameraDr;
+            PositionCamera();
+        }
+
+
     }
 }

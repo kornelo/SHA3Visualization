@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Media.Media3D;
-using SHA3Visualization;
 
 namespace SHA3Visualization.SHA3
 {
@@ -230,7 +226,10 @@ namespace SHA3Visualization.SHA3
         /// <param name="rate">The number of bits which are impacted while aborbing messages.</param>
         /// <exception cref="ArgumentNullException"><paramref name="bitstring"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="bitstring"/> is empty, or <paramref name="rate"/> is lower
-        /// than one, or <paramref name="rate"/> is greater than or equal to <paramref name="size"/>'s
+        /// than one, or <paramref name="rate"/> is greater than or equal to <paramref>
+        ///         <name>size</name>
+        ///     </paramref>
+        ///     's
         /// <see cref="SpongeSize.B"/>.</exception>
         /// <remarks>
         /// <para>The capacity of the state, i.e. the number of bits which are not impacted while absorbing messages, will

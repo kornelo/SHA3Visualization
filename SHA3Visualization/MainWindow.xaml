@@ -25,11 +25,11 @@
         <TextBox x:Name="xValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="X " VerticalAlignment="Top" Width="80" Margin="10,627,0,0"/>
         <TextBox x:Name="yValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="Y" VerticalAlignment="Top" Width="80" Margin="10,662,0,0" RenderTransformOrigin="0.467,0.522"/>
         <TextBox x:Name="zValue" HorizontalAlignment="Left" Height="30" TextWrapping="Wrap" Text="Z" VerticalAlignment="Top" Width="80" Margin="10,697,0,0"/>
-        <Button x:Name="plusZ" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,697,0,0" VerticalAlignment="Top" Width="30" Click="plusZ_Click"/>
-        <Button x:Name="plusY" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,662,0,0" VerticalAlignment="Top" Width="30" Click="plusY_Click"/>
-        <Button x:Name="plusX" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,627,0,0" VerticalAlignment="Top" Width="30" Click="plusX_Click"/>
-        <Button x:Name="minusZ" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,697,0,0" VerticalAlignment="Top" Width="30" Click="minusZ_Click"/>
-        <Button x:Name="minusY" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,662,0,0" VerticalAlignment="Top" Width="30" Click="minusY_Click"/>
-        <Button x:Name="minusX" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,627,0,0" VerticalAlignment="Top" Width="30" Click="minusX_Click"/>
+        <Button x:Name="plusZ" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,697,0,0" VerticalAlignment="Top" Width="30" Click="PlusZ_Click"/>
+        <Button x:Name="plusY" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,662,0,0" VerticalAlignment="Top" Width="30" Click="PlusY_Click"/>
+        <Button x:Name="plusX" Content="+" HorizontalAlignment="Left" Height="30" Margin="123,627,0,0" VerticalAlignment="Top" Width="30" Click="PlusX_Click"/>
+        <Button x:Name="minusZ" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,697,0,0" VerticalAlignment="Top" Width="30" Click="MinusZ_Click"/>
+        <Button x:Name="minusY" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,662,0,0" VerticalAlignment="Top" Width="30" Click="MinusY_Click"/>
+        <Button x:Name="minusX" Content="-" HorizontalAlignment="Left" Height="30" Margin="158,627,0,0" VerticalAlignment="Top" Width="30" Click="MinusX_Click"/>
     </Grid>
 </Window>

@@ -51,6 +51,11 @@ namespace SHA3Visualization
             DefineModel(x, y, z, values);
         }
 
+        public Cube(float x,float y, float z, float dx, float dy, float dz , string value)
+        {
+            FillCube(x,y,z,dx,dy,dz,value);
+        }
+
         public Model3DGroup ReturnMainModel()
         {
             return MainModel3Dgroup;
@@ -72,12 +77,12 @@ namespace SHA3Visualization
             SelectedMaterial = new DiffuseMaterial(Brushes.Red);
 
             var bits = new BitArray(values);
-            List<string> listString = new List<string>();
+            var listString = new List<string>();
 
             for(var i=0; i<bits.Length; i++)
             {
                 var builder = new StringBuilder(bits.Length);
-                if (bits[i]) builder.Append("1"); else builder.Append("0");
+                builder.Append(!bits[i] ? "0" : "1");
                 listString.Add(builder.ToString());
                 builder.Clear();
             }
@@ -100,11 +105,11 @@ namespace SHA3Visualization
 
             // Create cubes.
             
-            for (int x =2; x < 2*(width)+2; x += 2)
+            for (var x =2; x < 2*(width)+2; x += 2)
             {
-                for (int y =2; y < 2*(heigth)+2 ; y += 2)
+                for (var y =2; y < 2*(heigth)+2 ; y += 2)
                 {
-                    for (int z = 2; z < 2*(depth)+2; z += 2)
+                    for (var z = 2; z < 2*(depth)+2; z += 2)
                     {
                         // Make a cube with lower left corner (x, y, z).
                         //Task.Run(() =>
@@ -116,20 +121,20 @@ namespace SHA3Visualization
             }
 
             // X axis.
-            MeshGeometry3D mesh_x = MeshExtensions.XAxisArrow(6);
+            var meshX = MeshExtensions.XAxisArrow(6);
 
-                MainModel3Dgroup.Children.Add(mesh_x.SetMaterial(Brushes.Red, false));
+                MainModel3Dgroup.Children.Add(meshX.SetMaterial(Brushes.Red, false));
             
             // Y axis.
-            MeshGeometry3D mesh_y = MeshExtensions.YAxisArrow(6);
+            var meshY = MeshExtensions.YAxisArrow(6);
 
-                MainModel3Dgroup.Children.Add(mesh_y.SetMaterial(Brushes.Green, false));
+                MainModel3Dgroup.Children.Add(meshY.SetMaterial(Brushes.Green, false));
 
 
             // Z axis.
-            MeshGeometry3D mesh_z = MeshExtensions.ZAxisArrow(6);
+            var meshZ = MeshExtensions.ZAxisArrow(6);
 
-                MainModel3Dgroup.Children.Add(mesh_z.SetMaterial(Brushes.Blue, false));
+                MainModel3Dgroup.Children.Add(meshZ.SetMaterial(Brushes.Blue, false));
 
         }
 
@@ -147,15 +152,15 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z + dz));
                 mesh.Positions.Add(new Point3D(x, y + dy, z + dz));
                 AddingMeshProperties(ref mesh);
-                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)),value)));
+                GeometryModel3D geommodel3D = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)),value)));
 
                //MainModel3Dgroup.Dispatcher.Invoke(new Action(() =>
                //{
-                   MainModel3Dgroup.Children.Add(geommodel3d);
+                   MainModel3Dgroup.Children.Add(geommodel3D);
                //}));
 
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d, value);
+                SelectableModels.Add(geommodel3D, value);
             }
 
             // Back
@@ -166,14 +171,14 @@ namespace SHA3Visualization
                 mesh.Positions.Add(new Point3D(x, y + dy, z));
                 mesh.Positions.Add(new Point3D(x + dx, y + dy, z));
                 AddingMeshProperties(ref mesh);
-                GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)), value)));
+                GeometryModel3D geommodel3D = new GeometryModel3D(mesh, new DiffuseMaterial((Brush)Application.Current.Dispatcher.Invoke((new ActionBrush(PrepareBrush)), value)));
                 
                 //GeometryModel3D geommodel3d = new GeometryModel3D(mesh, new DiffuseMaterial(PrepareBrush(value)));
                 //MainModel3Dgroup.Dispatcher.Invoke(new Action(() => { 
-                MainModel3Dgroup.Children.Add(geommodel3d); //}));
+                MainModel3Dgroup.Children.Add(geommodel3D); //}));
                 
                 // Remember that this model is selectable.
-                SelectableModels.Add(geommodel3d, value);
+                SelectableModels.Add(geommodel3D, value);
 
             }
 
@@ -239,7 +244,7 @@ namespace SHA3Visualization
 
         }
 
-        private void AddingMeshProperties(ref MeshGeometry3D mesh)
+        private static void AddingMeshProperties(ref MeshGeometry3D mesh)
         {
             mesh.TriangleIndices.Add(0);
             mesh.TriangleIndices.Add(1);
@@ -253,7 +258,7 @@ namespace SHA3Visualization
             mesh.TextureCoordinates.Add(new Point(0, 0));
         }
 
-        private Brush PrepareBrush(string value)
+        private static Brush PrepareBrush(string value)
         { 
             TextBlock textBlock = new TextBlock() { Text = value, Background = value == "1" ? Brushes.LawnGreen: Brushes.Yellow };
             Size size = new Size(40, 40);
