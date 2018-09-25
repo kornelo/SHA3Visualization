@@ -74,8 +74,7 @@
     <Compile Include="Cube.cs" />
     <Compile Include="MeshExtensions.cs" />
     <Compile Include="SHA3\SHA3.cs" />
-    <Compile Include="SHA3\SpongeConstruction.cs" />
-    <Compile Include="SHA3\SpongeState.cs" />
+    <Compile Include="SHA3\SHA3Managed.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -84,10 +83,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SHA3\Bin.cs" />
-    <Compile Include="SHA3\Bitstring.cs" />
-    <Compile Include="SHA3\HashCoders.cs" />
-    <Compile Include="SHA3\KeccakPermutations.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
