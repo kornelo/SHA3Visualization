@@ -1,97 +1,67 @@
-﻿namespace System.Security.Cryptography
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SHA3Visualization.SHA3
 {
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    using System.Windows;
-    using System.Windows.Controls;
-
-    using SHA3Visualization;
-
-    /// <summary>
-    ///     Computes the <see cref="T:System.Security.Cryptography.SHA3" /> hash algorithm for the input data using the managed
-    ///     library.
-    /// </summary>
-    [ComVisible(true)]
-    public class SHA3Managed : SHA3
+    class SHA3Manual
     {
 
-        /// <summary>
-        /// </summary>
-        public SHA3Managed()
-            : base(512)
+        internal const int KeccakB = 1600;
+
+        internal const int KeccakLaneSizeInBits = 8 * 8;
+
+        internal const int KeccakNumberOfRounds = 24;
+
+        internal byte[] buffer;
+
+        internal int buffLength;
+
+        // protected new byte[] HashValue;
+        // protected new int HashSizeValue;
+        internal int keccakR;
+
+        internal ulong[] state;
+
+        internal readonly ulong[] RoundConstants = new[]
         {
-        }
+            0x0000000000000001UL, 0x0000000000008082UL, 0x800000000000808aUL,
+            0x8000000080008000UL, 0x000000000000808bUL, 0x0000000080000001UL,
+            0x8000000080008081UL, 0x8000000000008009UL, 0x000000000000008aUL,
+            0x0000000000000088UL, 0x0000000080008009UL, 0x000000008000000aUL,
+            0x000000008000808bUL, 0x800000000000008bUL, 0x8000000000008089UL,
+            0x8000000000008003UL, 0x8000000000008002UL, 0x8000000000000080UL,
+            0x000000000000800aUL, 0x800000008000000aUL, 0x8000000080008081UL,
+            0x8000000000008080UL, 0x0000000080000001UL, 0x8000000080008008UL
+        };
 
-        /// <summary>
-        /// </summary>
-        /// <param name="hashBitLength"></param>
-        public SHA3Managed(int hashBitLength)
-            : base(hashBitLength)
+        internal readonly int[] OffsetsOfRho = new[] { 0, 36, 3, 105, 210, 1, 300, 10, 45, 66, 190, 6, 171, 15, 253, 28, 55, 153, 21, 120, 91, 276, 231, 136, 78 };
+        private ulong[] A { get; set; }
+        private ulong[] B { get; set; }
+        private ulong[] C { get; set; }
+        private ulong[] D { get; set; }
+
+        //public override bool CanReuseTransform => true;
+
+        //public override byte[] Hash => this.HashValue;
+
+        public int HashByteLength => 512 / 8;
+
+        public int HashSize => 512;
+
+        public int SizeInBytes => this.KeccakR / 8;
+
+        internal int KeccakR
         {
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="ibStart"></param>
-        /// <param name="cbSize"></param>
-        protected override void HashCore(byte[] array, int ibStart, int cbSize)
-        {
-            base.HashCore(array, ibStart, cbSize);
-            if (cbSize == 0) return;
-            var sizeInBytes = this.SizeInBytes;
-            if (this.buffer == null) this.buffer = new byte[sizeInBytes];
-            var stride = sizeInBytes >> 3;
-            var utemps = new ulong[stride];
-            if (this.buffLength == sizeInBytes) throw new Exception("Unexpected error, the internal buffer is full");
-            this.AddToBuffer(array, ref ibStart, ref cbSize);
-            if (this.buffLength == sizeInBytes)
-            {
-                // buffer full
-                Buffer.BlockCopy(this.buffer, 0, utemps, 0, sizeInBytes);
-                this.KeccakF(utemps, stride);
-                this.buffLength = 0;
-            }
-
-            for (; cbSize >= sizeInBytes; cbSize -= sizeInBytes, ibStart += sizeInBytes)
-            {
-                Buffer.BlockCopy(array, ibStart, utemps, 0, sizeInBytes);
-                this.KeccakF(utemps, stride);
-            }
-
-            if (cbSize > 0)
-            {
-                // some left over
-                Buffer.BlockCopy(array, ibStart, this.buffer, this.buffLength, cbSize);
-                this.buffLength += cbSize;
-            }
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        protected override byte[] HashFinal()
-        {
-            var sizeInBytes = this.SizeInBytes;
-            var outb = new byte[this.HashByteLength];
-
-            // padding
-            if (this.buffer == null) this.buffer = new byte[sizeInBytes];
-            else Array.Clear(this.buffer, this.buffLength, sizeInBytes - this.buffLength);
-            this.buffer[this.buffLength++] = 0x06; //SHA3 takes 0x06, Keccak by default takes 1;
-            this.buffer[sizeInBytes - 1] |= 0x80;
-            var stride = sizeInBytes >> 3;
-            var utemps = new ulong[stride];
-            Buffer.BlockCopy(this.buffer, 0, utemps, 0, sizeInBytes);
-            this.KeccakF(utemps, stride);
-            Buffer.BlockCopy(this.state, 0, outb, 0, this.HashByteLength);
-            return outb;
+            get => this.keccakR;
+            set => this.keccakR = value;
         }
 
         private void KeccakF(ulong[] inb, int laneCount)
         {
-            while (--laneCount >= 0) this.state[laneCount] ^= inb[laneCount];
+            while (--laneCount >= 0) A[laneCount] ^= inb[laneCount];
             ulong Aba, Abe, Abi, Abo, Abu;
             ulong Aga, Age, Agi, Ago, Agu;
             ulong Aka, Ake, Aki, Ako, Aku;
@@ -107,32 +77,32 @@
             var round = laneCount;
 
 
-            // copyFromState(A, state)
-            Aba = this.state[0];
-            Abe = this.state[1];
-            Abi = this.state[2];
-            Abo = this.state[3];
-            Abu = this.state[4];
-            Aga = this.state[5];
-            Age = this.state[6];
-            Agi = this.state[7];
-            Ago = this.state[8];
-            Agu = this.state[9];
-            Aka = this.state[10];
-            Ake = this.state[11];
-            Aki = this.state[12];
-            Ako = this.state[13];
-            Aku = this.state[14];
-            Ama = this.state[15];
-            Ame = this.state[16];
-            Ami = this.state[17];
-            Amo = this.state[18];
-            Amu = this.state[19];
-            Asa = this.state[20];
-            Ase = this.state[21];
-            Asi = this.state[22];
-            Aso = this.state[23];
-            Asu = this.state[24];
+            // copyFromA(A, A)
+            Aba = A[0];
+            Abe = A[1];
+            Abi = A[2];
+            Abo = A[3];
+            Abu = A[4];
+            Aga = A[5];
+            Age = A[6];
+            Agi = A[7];
+            Ago = A[8];
+            Agu = A[9];
+            Aka = A[10];
+            Ake = A[11];
+            Aki = A[12];
+            Ako = A[13];
+            Aku = A[14];
+            Ama = A[15];
+            Ame = A[16];
+            Ami = A[17];
+            Amo = A[18];
+            Amu = A[19];
+            Asa = A[20];
+            Ase = A[21];
+            Asi = A[22];
+            Aso = A[23];
+            Asu = A[24];
 
             for (round = 0; round < KeccakNumberOfRounds; round += 2)
             {
@@ -233,7 +203,7 @@
                 Eso = BCo ^ (~BCu & BCa);
                 Esu = BCu ^ (~BCa & BCe);
 
-                CopyToState(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
+                CopyToA(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
 
                 // prepareTheta
                 BCa = Eba ^ Ega ^ Eka ^ Ema ^ Esa;
@@ -333,93 +303,143 @@
                 Asu = BCu ^ (~BCa & BCe);
 
 
-                CopyToState(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
+                CopyToA(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
             }
 
-            // copyToState(state, A)
-            this.state[0] = Aba;
-            this.state[1] = Abe;
-            this.state[2] = Abi;
-            this.state[3] = Abo;
-            this.state[4] = Abu;
-            this.state[5] = Aga;
-            this.state[6] = Age;
-            this.state[7] = Agi;
-            this.state[8] = Ago;
-            this.state[9] = Agu;
-            this.state[10] = Aka;
-            this.state[11] = Ake;
-            this.state[12] = Aki;
-            this.state[13] = Ako;
-            this.state[14] = Aku;
-            this.state[15] = Ama;
-            this.state[16] = Ame;
-            this.state[17] = Ami;
-            this.state[18] = Amo;
-            this.state[19] = Amu;
-            this.state[20] = Asa;
-            this.state[21] = Ase;
-            this.state[22] = Asi;
-            this.state[23] = Aso;
-            this.state[24] = Asu;
+            // copyToA(A, A)
+            A[0] = Aba;
+            A[1] = Abe;
+            A[2] = Abi;
+            A[3] = Abo;
+            A[4] = Abu;
+            A[5] = Aga;
+            A[6] = Age;
+            A[7] = Agi;
+            A[8] = Ago;
+            A[9] = Agu;
+            A[10] = Aka;
+            A[11] = Ake;
+            A[12] = Aki;
+            A[13] = Ako;
+            A[14] = Aku;
+            A[15] = Ama;
+            A[16] = Ame;
+            A[17] = Ami;
+            A[18] = Amo;
+            A[19] = Amu;
+            A[20] = Asa;
+            A[21] = Ase;
+            A[22] = Asi;
+            A[23] = Aso;
+            A[24] = Asu;
 
-           // CopyToState(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
+            // CopyToA(Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku, Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu);
 
         }
 
-        private void CopyToState(
-        ulong Aba, ulong Abe, ulong Abi, ulong Abo, ulong Abu,
-        ulong Aga, ulong Age, ulong Agi, ulong Ago, ulong Agu,
-        ulong Aka, ulong Ake, ulong Aki, ulong Ako, ulong Aku,
-        ulong Ama, ulong Ame, ulong Ami, ulong Amo, ulong Amu,
-        ulong Asa, ulong Ase, ulong Asi, ulong Aso, ulong Asu)
+        private void CopyToA(
+            ulong Aba, ulong Abe, ulong Abi, ulong Abo, ulong Abu,
+            ulong Aga, ulong Age, ulong Agi, ulong Ago, ulong Agu,
+            ulong Aka, ulong Ake, ulong Aki, ulong Ako, ulong Aku,
+            ulong Ama, ulong Ame, ulong Ami, ulong Amo, ulong Amu,
+            ulong Asa, ulong Ase, ulong Asi, ulong Aso, ulong Asu)
         {
 
-            // copyToState(state, A)
-            this.state[0] = Aba;
-            this.state[1] = Abe;
-            this.state[2] = Abi;
-            this.state[3] = Abo;
-            this.state[4] = Abu;
-            this.state[5] = Aga;
-            this.state[6] = Age;
-            this.state[7] = Agi;
-            this.state[8] = Ago;
-            this.state[9] = Agu;
-            this.state[10] = Aka;
-            this.state[11] = Ake;
-            this.state[12] = Aki;
-            this.state[13] = Ako;
-            this.state[14] = Aku;
-            this.state[15] = Ama;
-            this.state[16] = Ame;
-            this.state[17] = Ami;
-            this.state[18] = Amo;
-            this.state[19] = Amu;
-            this.state[20] = Asa;
-            this.state[21] = Ase;
-            this.state[22] = Asi;
-            this.state[23] = Aso;
-            this.state[24] = Asu;
+            // copyToA(A, A)
+            A[0] = Aba;
+            A[1] = Abe;
+            A[2] = Abi;
+            A[3] = Abo;
+            A[4] = Abu;
+            A[5] = Aga;
+            A[6] = Age;
+            A[7] = Agi;
+            A[8] = Ago;
+            A[9] = Agu;
+            A[10] = Aka;
+            A[11] = Ake;
+            A[12] = Aki;
+            A[13] = Ako;
+            A[14] = Aku;
+            A[15] = Ama;
+            A[16] = Ame;
+            A[17] = Ami;
+            A[18] = Amo;
+            A[19] = Amu;
+            A[20] = Asa;
+            A[21] = Ase;
+            A[22] = Asi;
+            A[23] = Aso;
+            A[24] = Asu;
 
-            //CubeHandler.State = new List<ulong>();
+            //CubeHandler.A = new List<ulong>();
 
-            //foreach (var state in this.state)
+            //foreach (var A in A)
             //{
-            //    CubeHandler.State.Add(state);
+            //    CubeHandler.A.Add(A);
             //}
 
 
-            Buffer.BlockCopy(this.state, 0, this.State = new ulong[this.HashByteLength], 0, this.HashByteLength);
+            Buffer.BlockCopy(A, 0, A = new ulong[this.HashByteLength], 0, this.HashByteLength);
 
             CubeHandler.State = new List<ulong>();
 
-            foreach (var state in this.State)
+            foreach (var state in A)
             {
                 CubeHandler.State.Add(state);
             }
         }
 
+        private void Theta(ulong[] A)
+        {
+            // prepareTheta
+            C[0] = A[0] ^ A[5] ^ A[10] ^ A[15] ^ A[20];
+            C[1] = A[1] ^ A[6] ^ A[11] ^ A[16] ^ A[21];
+            C[2] = A[2] ^ A[7] ^ A[12] ^ A[17] ^ A[22];
+            C[3] = A[3] ^ A[8] ^ A[13] ^ A[18] ^ A[23];
+            C[4] = A[4] ^ A[9] ^ A[14] ^ A[19] ^ A[24];
+
+
+            // thetaRhoPiChiIotaPrepareTheta(round  , A, E)
+            D[0] = C[4] ^ this.ROL(C[1], 1);
+            D[1] = C[0] ^ this.ROL(C[2], 1);
+            D[2] = C[1] ^ this.ROL(C[3], 1);
+            D[3] = C[2] ^ this.ROL(C[4], 1);
+            D[4] = C[3] ^ this.ROL(C[0], 1);
+
+            for (var i = 0; i < 5; i++)
+            {
+                A[i] ^= D[i];
+                A[i+5] ^= D[i];
+                A[i+10] ^= D[i];
+                A[i+15] ^= D[i];
+                A[i+20] ^= D[i];
+            }
+        }
+
+        private void Rho(ulong[] A)
+        {
+            for (var i = 0; i < 25; i++) this.A[i] = ROL(A[i], this.OffsetsOfRho[i]);
+        }
+
+        private void Pi(ulong[] A)
+        {
+            for (var x = 0; x < 5; x++)
+                for(var y=0; y<5; y++)
+                    B[(y*5)+(x+3*y)%5] = A[(x*5)+y];
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        protected ulong ROL(ulong a, int offset)
+        {
+            return (a << (offset % KeccakLaneSizeInBits))
+                   ^ (a >> (KeccakLaneSizeInBits - offset % KeccakLaneSizeInBits));
+        }
     }
+
 
 }

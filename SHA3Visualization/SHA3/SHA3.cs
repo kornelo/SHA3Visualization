@@ -27,6 +27,8 @@
 
         internal ulong[] state;
 
+        public ulong[] State { get; set; }
+
         static SHA3()
         {
             CryptoConfig.AddAlgorithm(

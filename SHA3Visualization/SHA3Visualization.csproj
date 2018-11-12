@@ -72,9 +72,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Cube.cs" />
+    <Compile Include="CubeHandler.cs" />
+    <Compile Include="HashStateHandler.cs" />
     <Compile Include="MeshExtensions.cs" />
+    <Compile Include="SHA3\HashState.cs" />
     <Compile Include="SHA3\SHA3.cs" />
     <Compile Include="SHA3\SHA3Managed.cs" />
+    <Compile Include="SHA3\SHA3Manual.cs" />
+    <Compile Include="Useless.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
